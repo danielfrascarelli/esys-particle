@@ -1,0 +1,518 @@
+/////////////////////////////////////////////////////////////
+//                                                         //
+// Copyright (c) 2003-2017 by The University of Queensland //
+// Centre for Geoscience Computing                         //
+// http://earth.uq.edu.au/centre-geoscience-computing      //
+//                                                         //
+// Primary Business: Brisbane, Queensland, Australia       //
+// Licensed under the Open Software License version 3.0    //
+// http://www.apache.org/licenses/LICENSE-2.0              //
+//                                                         //
+/////////////////////////////////////////////////////////////
+
+// --- TML includes ---
+#include "tml/comm/comm.h"
+
+// --- Project includes ---
+#include "InteractionFieldMaster.h"
+#include "field_const.h"
+#include "console.h"
+
+//--- IO includes ---
+#include <iostream>
+#include <fstream>
+
+//--- STL inculdes ---
+#include <string>
+#include <map>
+
+using std::cout;
+using std::endl;
+using std::ofstream;
+using std::string;
+using std::multimap;
+
+/*!
+  Constructor. Setup master and broadcast parameters to slaves
+
+  \param comm the communicator
+  \param fieldname the name of the field to be saved
+  \param igtype the type of interaction group for which the field is saved
+  \param igname the name of the interaction group for which the field is saved
+  \param filename the name of the file to be saved into or the base for the generation of the filenames if the saving format requires multiple files
+  \param savetype the way to save data, currently supported are DX,SUM
+  \param t0 the first timestep to be saved
+  \param tend the last timestep to be saved
+  \param dt the interval between timesteps to be saving
+  \param checked choose between "full" and "checked" fields
+*/ 
+ScalarInteractionFieldMaster::ScalarInteractionFieldMaster(TML_Comm* comm,const string& fieldname,const string& igtype,const string& igname,const string& filename,const string& savetype,int t0,int tend,int dt,bool checked)
+  :AFieldMaster(comm,fieldname,filename,savetype,t0,tend,dt)
+{
+  m_comm->broadcast_cont(fieldname);
+  m_comm->broadcast(m_id);
+  m_comm->broadcast_cont(igname);
+  m_comm->broadcast_cont(igtype);
+  int is_tagged=0;
+  m_comm->broadcast(is_tagged);
+  int is_checked=checked ? 1 : 0;
+  m_comm->broadcast(is_checked);
+}
+
+/*!
+  Constructor. Setup master and broadcast parameters to slaves
+
+  \param comm the communicator
+  \param fieldname the name of the field to be saved
+  \param igtype the type of interaction group for which the field is saved
+  \param igname the name of the interaction group for which the field is saved
+  \param filename the name of the file to be saved into or the base for the generation of the filenames if the saving format requires multiple files
+  \param savetype the way to save data, currently supported are DX,SUM
+  \param t0 the first timestep to be saved
+  \param tend the last timestep to be saved
+  \param dt the interval between timesteps to be saving
+  \param tag the tag of the particles to be saved
+  \param mask the mask to be applied to the tag
+  \param checked choose between "full" and "checked" fields
+*/
+ScalarInteractionFieldMaster::ScalarInteractionFieldMaster(TML_Comm* comm,const string& fieldname,const string& igtype,const string& igname,const string& filename,const string& savetype,int t0,int tend,int dt,int tag,int mask,bool checked)
+  :AFieldMaster(comm,fieldname,filename,savetype,t0,tend,dt)
+{
+  m_comm->broadcast_cont(fieldname);
+  m_comm->broadcast(m_id);
+  m_comm->broadcast_cont(igname);
+  m_comm->broadcast_cont(igtype);
+  int is_tagged=1;
+  m_comm->broadcast(is_tagged);
+  m_comm->broadcast(tag);
+  m_comm->broadcast(mask);
+  int is_checked=checked ? 1 : 0;
+  m_comm->broadcast(is_checked);
+}
+
+void ScalarInteractionFieldMaster::collect()
+{
+  // send field id to slave
+  m_comm->broadcast(m_id);
+
+  switch(m_write_type){
+  case WRITE_TYPE_SUM: collectSum(); break;
+  case WRITE_TYPE_RAW2: collectFull2();break;
+  case WRITE_TYPE_RAW_WITH_ID: collectFullWithID(); break;
+  case WRITE_TYPE_RAW_WITH_POS_ID: collectFullWithPosID(); break;
+  default: collectFull();
+  }
+
+  // if(m_write_type==WRITE_TYPE_SUM){
+//     collectSum(); 
+//   } else if (m_write_type==5){
+//     collectFull2();
+//   } else if (m_write_
+//   } else {
+//     collectFull();
+//   }
+}
+
+/*!
+  collect full data set
+*/
+void ScalarInteractionFieldMaster::collectFull()
+{
+  multimap<int,pair<Vec3,double> > temp_mm;
+  
+  // send type of collect to slaves
+  int coll_type=COLL_TYPE_FULL;
+  m_comm->broadcast(coll_type);
+
+  // get data from slaves
+  m_comm->gather(temp_mm);
+  // collate receive data from multimap into single map  
+  for(multimap<int,pair<Vec3,double> >::iterator iter=temp_mm.begin();
+      iter!=temp_mm.end();
+      iter++){
+    m_data.push_back(iter->second);
+  }
+}
+/*!
+  collect full data set, both particle positions
+*/
+void ScalarInteractionFieldMaster::collectFull2()
+{
+  multimap<int,IVecData2> temp_mm;
+
+  // send type of collect to slaves
+  int coll_type=5;
+  m_comm->broadcast(coll_type);
+  // get data from slaves
+  m_comm->gather(temp_mm);
+  // collate receive data from multimap into single map
+  console.XDebug() << temp_mm.size() << " data sets collected\n";
+  int count=0;
+  for(multimap<int,IVecData2>::iterator iter=temp_mm.begin();
+      iter!=temp_mm.end();
+      iter++){
+    m_data2.push_back(iter->second);
+    count++;
+    // write debug message every 10k writes
+    if((count % 10000)==0){
+      console.XDebug() << count << " data pushed into m_data2\n";
+    }  
+  }
+  console.XDebug() << "finished inserting " << count << " data into m_data2\n";
+}
+
+/*!
+  collect data and <pid1,pid2,pos> info
+*/
+void ScalarInteractionFieldMaster::collectFullWithID()
+{
+  // debug output 
+  console.XDebug() << "ScalarInteractionFieldMaster::collectFullWithID()\n";
+
+  multimap<int,DataWithID> temp_mm;
+
+  // send type of collect to slaves
+  int coll_type=COLL_TYPE_FULL_WITH_ID;
+  m_comm->broadcast(coll_type);
+  console.XDebug() << "after bcast coll_type\n";
+  // get data from slaves
+  m_comm->gather(temp_mm);
+  console.XDebug() << "after gather temp_mm \n";
+  // collate receive data from multimap into single map
+  console.XDebug() << temp_mm.size() << " data sets collected\n";
+  int count=0;
+  for(multimap<int,DataWithID>::iterator iter=temp_mm.begin();
+      iter!=temp_mm.end();
+      iter++){
+    m_data_with_id.push_back(iter->second);
+    count++;
+    // write debug message every 10k writes
+    if((count % 10000)==0){
+      console.XDebug() << count << " data pushed into m_data_with_id\n";
+    }  
+  }
+  console.XDebug() << "finished inserting " << count << " data into m_data_with_id\n";
+}
+
+/*!
+  collect data and <pid1,pid2,pos1,pos2,ipos> info
+*/
+void ScalarInteractionFieldMaster::collectFullWithPosID()
+{
+  multimap<int,DataWithPosID> temp_mm;
+
+  // debug output 
+  console.XDebug() << "ScalarInteractionFieldMaster::collectFullWithPosID()\n";
+
+  // send type of collect to slaves
+  int coll_type=COLL_TYPE_FULL_WITH_POS_ID;
+  m_comm->broadcast(coll_type);
+  // get data from slaves
+  m_comm->gather(temp_mm);
+  // collate receive data from multimap into single map
+  console.XDebug() << temp_mm.size() << " data sets collected\n";
+  int count=0;
+  for(multimap<int,DataWithPosID>::iterator iter=temp_mm.begin();
+      iter!=temp_mm.end();
+      iter++){
+    m_data_with_pos_id.push_back(iter->second);
+    count++;
+    // write debug message every 10k writes
+    if((count % 10000)==0){
+      console.XDebug() << count << " data pushed into m_data_with_id\n";
+    }  
+  }
+  console.XDebug() << "finished inserting " << count << " data into m_data_with_id\n";
+}
+
+/*!
+  collect sum of values only 
+*/
+void ScalarInteractionFieldMaster::collectSum()
+{
+  multimap<int,double> temp_mm;
+
+  // send type of collect to slaves
+  int coll_type=COLL_TYPE_SUM;
+  m_comm->broadcast(coll_type);
+
+  // get data from slaves
+  m_comm->gather(temp_mm);
+
+  // collate receive data from multimap into single map  
+  for(multimap<int,double>::iterator iter=temp_mm.begin();
+      iter!=temp_mm.end();
+      iter++){
+    m_sum_vec.push_back(iter->second);
+  } 
+}
+
+/*!
+  write data out as OpenDX compatible file
+
+  \todo desciption
+*/
+void ScalarInteractionFieldMaster::writeAsDX()
+{
+  //generate filename
+  string fn=makeFilename();
+  // write header 
+  ofstream out_file(fn.c_str());
+  out_file << "points = " << m_data.size() << endl;
+  out_file << "format = ascii" << endl;
+  out_file << "dependency = positions, positions" << endl;
+  out_file << "interleaving = field" << endl;
+  out_file << "field = locations, " << m_field_name << endl;
+  out_file << "structure = 3-vector, scalar" << endl;
+  out_file << "type = float, float  " << endl;
+  out_file << "header =  marker \"Start\\n\"" << endl;
+  out_file << endl << "end" << endl;
+  out_file << "Start" << endl;
+  
+  // write data
+  for(vector<pair<Vec3,double> >::iterator iter=m_data.begin();
+      iter!=m_data.end();
+      iter++){
+    out_file << iter->first  << " " << iter->second << endl;
+  }
+  out_file.close();
+  m_data.erase(m_data.begin(),m_data.end());
+}
+
+/*!
+  write data as pos1,pos2,value groups 
+*/
+void ScalarInteractionFieldMaster::writeAsRAW2()
+{
+  //generate filename
+  string fn=makeFilename();
+  
+  // write data
+  ofstream out_file(fn.c_str());
+  // check if file is sucessfully opened
+  if(!out_file){
+    console.Error() << "can not open output file " << fn << "\n";
+  } else {
+    int count=0;
+    console.XDebug() << m_data2.size() << " vectors to be written\n";
+    for(vector<IVecData2>::iterator iter=m_data2.begin();
+        iter!=m_data2.end();
+        iter++) {
+#if 0
+      out_file
+        << (iter->first).template get<0>()
+        << " "
+        << (iter->first).template get<1>()
+        << " "
+        << (iter->first).template get<2>()
+        << " "
+        << (iter->first).template get<3>()
+        << " "
+        << (iter->first).template get<4>()
+        << " "
+        << iter->second
+        << endl;
+#else
+      out_file
+        << (iter->first).get<0>()
+        << " "
+        << (iter->first).get<1>()
+        << " "
+        << (iter->first).get<2>()
+        << " "
+        << (iter->first).get<3>()
+        << " "
+        << (iter->first).get<4>()
+        << " "
+        << iter->second
+        << endl;
+#endif
+      count++;
+      // write debug message every 10k writes
+      if((count % 10000)==0){
+        console.XDebug() << count << " vectors written\n";
+      }
+    }
+    console.XDebug() << "finished writing " << count << " vectors \n";
+    // close file
+    out_file.close();
+  }
+  //clean up
+  m_data2.clear();
+}
+
+/*!
+  write data as pid1,pid2,ipos,value groups 
+*/
+void ScalarInteractionFieldMaster::writeAsRawWithID()
+{
+  //generate filename
+  string fn=makeFilename();
+  
+  // write data
+  ofstream out_file(fn.c_str());
+  // check if file is sucessfully opened
+  if(!out_file){
+    console.Error() << "can not open output file " << fn << "\n";
+  } else {
+    int count=0;
+    console.XDebug() << m_data_with_id.size() << " vectors to be written\n";
+    for(vector<DataWithID>::iterator iter=m_data_with_id.begin();
+        iter!=m_data_with_id.end();
+        iter++) {
+      out_file
+        << (iter->first).get<0>()
+        << " "
+        << (iter->first).get<1>()
+        << " "
+        << (iter->first).get<2>()
+	<< " "
+        << iter->second
+        << endl;
+      count++;
+      // write debug message every 10k writes
+      if((count % 10000)==0){
+        console.XDebug() << count << " vectors written\n";
+      }
+    }
+    console.XDebug() << "finished writing " << count << " vectors \n";
+    // close file
+    out_file.close();
+  }
+  //clean up
+  m_data_with_id.clear();
+}
+
+/*!
+  write data as pid1,pid2,ipos,value groups 
+*/
+void ScalarInteractionFieldMaster::writeAsRawWithPosID()
+{
+  //generate filename
+  string fn=makeFilename();
+
+  // debug output
+  console.XDebug() << "ScalarInteractionFieldMaster::writeAsRawWithPosID() " << fn << "\n"; 
+  
+  // write data
+  ofstream out_file(fn.c_str());
+  // check if file is sucessfully opened
+  if(!out_file){
+    console.Error() << "can not open output file " << fn << "\n";
+  } else {
+    int count=0;
+    console.XDebug() << m_data_with_id.size() << " vectors to be written\n";
+    for(vector<DataWithPosID>::iterator iter=m_data_with_pos_id.begin();
+        iter!=m_data_with_pos_id.end();
+        iter++) {
+      out_file
+        << (iter->first).get<0>()
+        << " "
+        << (iter->first).get<1>()
+        << " "
+        << (iter->first).get<2>()
+	<< " "
+	<< (iter->first).get<3>()
+        << " "
+        << (iter->first).get<4>()
+	<< " "
+        << iter->second
+        << endl;
+      count++;
+      // write debug message every 10k writes
+      if((count % 10000)==0){
+        console.XDebug() << count << " vectors written\n";
+      }
+    }
+    console.XDebug() << "finished writing " << count << " vectors \n";
+    // close file
+    out_file.close();
+  }
+  //clean up
+  m_data_with_pos_id.clear();
+}
+
+/*!
+  write data as pos1,value pairs 
+*/
+void ScalarInteractionFieldMaster::writeAsRAW()
+{  
+  // make filename
+  string fn=makeFilename();
+  // open file
+  ofstream out_file(fn.c_str());
+  
+  // write data
+  for(vector<pair<Vec3,double> >::iterator iter=m_data.begin();
+      iter!=m_data.end();
+      iter++){
+    out_file << iter->first  << " " << iter->second << endl;
+  }
+  out_file.close();
+
+  // clean up
+  m_data.erase(m_data.begin(),m_data.end());
+}
+
+/*!
+  sum data and write them out into a single continuous file
+*/
+void ScalarInteractionFieldMaster::writeAsSUM()
+{
+  // sum data
+  double sum_data=0.0;
+  for(vector<double>::iterator iter=m_sum_vec.begin();
+      iter!=m_sum_vec.end();
+      iter++){
+    sum_data+=*iter;
+  }
+  // open file for appending
+  ofstream out_file(m_file_name.c_str(),ios::app);
+
+  // set output precision to 10 significant digits, scientific format 
+  out_file.setf(ios_base::scientific, ios_base::floatfield);
+  out_file.precision(10);
+
+  // write data
+  out_file << sum_data << endl;
+
+  // close file
+  out_file.close();
+  //clean up
+  m_sum_vec.erase(m_sum_vec.begin(),m_sum_vec.end());
+
+}
+
+/*!
+  get the maximum of the data and write it out into a single continuous file
+*/
+void ScalarInteractionFieldMaster::writeAsMAX()
+{
+  // sum data
+  double max_data=*(m_sum_vec.begin());
+  for(vector<double>::iterator iter=m_sum_vec.begin();
+      iter!=m_sum_vec.end();
+      iter++){
+    max_data=(*iter > max_data) ? *iter : max_data;
+  }
+  // open file for appending
+  ofstream out_file(m_file_name.c_str(),ios::app);
+  // write data
+  out_file << max_data << endl;
+
+  // close file
+  out_file.close();
+  //clean up
+  m_sum_vec.erase(m_sum_vec.begin(),m_sum_vec.end());
+
+}
+
+/*!
+  write data as a raw series of values, one row of values per time step,
+  all timesteps into the same file
+*/
+void ScalarInteractionFieldMaster::writeAsRAW_SERIES()
+{
+  cerr << "ScalarInteractionFieldMaster::writeAsRAW_SERIES not implemented" << endl;
+}
+

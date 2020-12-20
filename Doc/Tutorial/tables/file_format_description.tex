@@ -1,0 +1,34 @@
+\section{Descriptions of the Output File Formats for Field Savers}
+\label{sec:file_format_description}
+
+The current FieldSaver infrastructure supports at the moment a total 10 different output formats. Three of those formats ("DX", "POV" and "SILO") are for use with specific visualisation software, the other 7 ("RAW", "RAW2", "RAW\_SERIES", "RAW\_WITH\_ID", "RAW\_WITH\_POS\_ID", "SUM" and "MAX") are plain ASCII formats writing different amounts of data. Data in multi-colums files are always separated by spaces. Below is a description of those formats. N.B. column indices given below start at 1, not at 0 as in C or python notation.
+
+\subsection{RAW}
+This format produces one file per saved time step, containing a particle position and the field value for each field value. In case of a ParticleFieldSaver the position is that of the particle, in case of a InteractionFieldSaver its the location of the first particle (i.e. the one with the lower ID) \footnote{It would be possible to change this to the actual interaction location - which would make more sense} involved in the interaction. The files therefore consist of 4 columns in case of a scalar field \textbf{px py pz v} or 6 colums in case of a vector field \textbf{px py pz vx vy vz} where 
+\begin{itemize}
+\item \textbf{px py pz}  in columns 1, 2, 3 is the position of the particle with the lower id as described above
+\item \textbf{v}, in column 4 or in case of a vector field, \textbf{vx vy vz} in columns 4, 5, 6, represent the value of the saved field 
+\end{itemize}
+  
+
+\subsection{RAW2}
+This format produces one file per saved time step, 
+
+\subsection{RAW\_SERIES}
+This format produces a single file for the whole simulation. This file contains one row per saved time step and either one column per field value in case of a scalar field or 3 columns per field value in case of a vector field. This implies that with the RAW\_SERIES format the location of the field value is not saved. Typical   
+
+\subsection{RAW\_WITH\_ID}
+
+
+\subsection{RAW\_WITH\_POS\_ID}
+The RAW\_WITH\_POS\_ID format is only applicable to interaction savers \footnote{up to rev. 1100 there is a bug which prevents RAW\_WITH\_POS\_ID from working with scalar interaction fields.}. It produces one file per saved time step, containing the particle IDs, particle positions, interaction position and the field value for each interaction. The files therefore consist 1 row per interaction having 12 columns in case of a scalar field \textbf{id1 id2 p1x p1y p1z p2x p2y p2z ipx ipy ipz v} or 14 colums in case of a vector field \textbf{id1 id2 p1x p1y p1z p2x p2y p2z ipx ipy ipz vx vy vz} where
+\begin{itemize}
+\item \textbf{id1 id2} in columns 1, 2 are the particle IDs of the two particles involved in the interaction
+\item \textbf{p1x p1y p1z} in columns 3, 4, 5 are the x-, y- and z-component of position of the first particle
+\item \textbf{p2x p2y p2z} in columns 6, 7, 8 are the x-, y- and z-component of positionof the second particle
+\item \textbf{ipx ipy ipz} in columns 9, 10, 11 are the x-, y- and z-component of the interaction location, i.e. for most interaction types roughly the contact point between the particles
+\item \textbf{v} in column 12, or in case of a vector field, \textbf{vx vy vz} in columns 12, 13, 14, represent the value of the saved field for the interaction 
+\end{itemize}
+
+\subsection{SUM}
+\subsection{MAX}

@@ -1,0 +1,6 @@
+FILE(GLOB MODEL_SRC_LIB "src/*.cpp")
+#===========================================================
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ntable/src)
+ADD_LIBRARY(ntable SHARED ${MODEL_SRC_LIB})
+TARGET_LINK_LIBRARIES(ntable ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+INSTALL(TARGETS ntable DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

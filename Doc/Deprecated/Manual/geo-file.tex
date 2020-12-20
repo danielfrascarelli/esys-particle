@@ -1,0 +1,135 @@
+\chapter{The Geometry File Format}
+\label{cha:geofileformat}
+
+\section{Introduction}
+The input file described here contains only the description of the model geometry. The material properties of the particles (density \dots) and interactions (spring constant, breaking distance \dots) are described in the script. In order to facilitate this, both particles and predefined connections/interactions have tags.   
+\subsubsection*{Rationale:}
+\begin{itemize}
+\item Makes it possible to change the properties
+independently from the geometries, for example in order to easily run a suite of simulation with identical geometries but varying material properties.
+\end{itemize}
+The input files are pure ASCII files formatted in the way described in the following sections. 
+\subsubsection*{Rationale:}
+\begin{itemize}
+\item ASCII is preferred over binary format for portability and debugability reasons.
+\item Using some ``standard'' description language, i.e. XML seems 
+  \begin{itemize}
+  \item unnecessary as the files are machine generated and read, which reduces the need for flexibility and verbosity
+  \item a suboptimal solution with respect to file size, i.e. a million particle file would grow quite large if XML was used \footnote{It would be quite large anyway, somewhere around 40--50 byte per particle and 15--20 byte per connection, i.e. a file describing a model consisting of $10^6$ part in a fully connected regular 3D lattice would have a size around 100MB. So we may look at using compressed (libz, libbz2) files at some later stage.} 
+  \end{itemize}
+\end{itemize}
+
+
+\section{The File Format}
+
+The geometry file specifies the overall model geometry, the particle positions and geometries, the assignment of the particles to some particle groups and the initial connectivity between particles, i.e. the bonds. In case of spherical particles the per-particle geometry is reduced to just the particle radius. 
+\subsection{File Structure}
+The geometry file consist of a header and 3 content sections:
+\begin{enumerate}
+\item The ``model geometry'' section which contains the containing volume(s) of the model and definition of circular (periodic) boundary conditions
+\item The ``particles'' section
+\item The ``connections'' section 
+\end{enumerate}
+\subsection{Header}
+The header just contains an identifier for the file type and the version of the file. 
+\begin{verbatim}
+LSMGeometry 1.2
+\end{verbatim}
+where \textsf{LSMGeometry} is the identifier and \textsf{1.2} the current version number.
+
+
+\subsection{Model Geometry}
+
+The model geometry section contains a description of the volume(s) in which the model is contained, a definition which of the boundaries of this volume are periodic and the dimensionality of the model. In the current version the containing volume is just an axis aligned bounding box which is given by the coordinates of minimum and maximum corners. The boundaries are described by a boolean value (0,1) for each coordinate axis, where 1 stands for periodic, 0 for non-periodic. The distinction between 2D and 3D models is done between done in order to be able to calculate the correct volume of a particle from its radius, i.e. $\pi r^2$ vs. ${4 \over 3} \pi r^3$. For Version 1.1. files which have no dimensionality given, 2D is assumed.
+\begin{verbatim}
+BoundingBox min.x min.y min.z max.x max.y max.z
+PeriodicBoundaries x y z
+Dimensions [2D|3D]
+\end{verbatim}
+
+
+\subsection{Particles}
+
+The particle section of the geometry file contains beginning and end markers, a keyword for the particle type, i.e. \textsf{Simple} for simple (irrotational) spherical particles, the total number of particles and a set of data for each particle. In case of spherical particles these data consist of the position (vector), radius (float), particle id (int)  and the particle tag (int). The tag is used to assign the particle to specific particle groups. 
+\begin{verbatim}
+BeginParticles
+Simple
+nparticles
+pos0.x pos0.y pos0.z rad0 id0 tag0
+pos1.x pos1.y pos1.z rad1 id1 tag1 
+pos2.x pos2.y pos2.z rad2 id2 tag2 
+...
+posN.x posN.y posN.z radN idN tagN 
+EndParticles
+\end{verbatim}
+\subsubsection{Particle Types}
+\begin{tabular}[h!]{|l|l|}
+\hline
+keyword & description \\
+\hline
+\hline
+Simple & simple spherical particle \\
+\hline
+\end{tabular}
+
+
+\subsection{Connectivity}
+
+A list of predefined connections between particles is necessary for the definition of particle interactions which are persistent and not dynamically formed during the simulation, i.e. bonds. The connectivity section of the geometry file contains beginning and end markers, the number of connections and for each connection the ids (int) of the two particles involved and a tag (int) which assigns the connection to a connection group. The pairs of particle ids must be ordered i.e. the first id must be less than the second one.
+\begin{verbatim}
+BeginConnect
+nconnect
+id0_1 id0_2 tag0
+id1_1 id1_2 tag1
+id2_1 id2_2 tag2
+...
+idN_1 idN_2 tagN
+EndConnect
+\end{verbatim}
+\label{sec:prp}
+\section{Example}
+Simple example: boundaries periodic in x, open in y and z, 8 irrotational spherical particles of radius 1.0, positioned at the corners of a cube and connected along the edges of the cube. The particles are grouped into 2 groups, representing the particles with $y=0$ and $y=2$ respectively. The tags are 0 for $y=0.0$ and 1 for $y=2.0$. The connections all belong to the same group. \textbf{Note:} The particle tags and the connection tags are independent of each other, i.e. we can use ``0'' as a connection tag even if ``0'' is already used as a particle tag. 
+%%\newpage
+\begin{verbatim}
+LSMGeometry 1.2
+BoundingBox -1.0 -1.0 -1.0 3.0 3.0 3.0
+PeriodicBoundaries 1 0 0
+Dimension 3D
+BeginParticles
+Simple
+8
+0.0 0.0 0.0 1.0 0 0
+0.0 0.0 1.0 1.0 1 0
+0.0 1.0 0.0 1.0 2 1
+0.0 1.0 1.0 1.0 3 1 
+1.0 0.0 0.0 1.0 4 0
+1.0 0.0 1.0 1.0 5 0
+1.0 1.0 0.0 1.0 6 1 
+1.0 1.0 1.0 1.0 7 1 
+EndParticles
+BeginConnect
+12
+0 1 0
+0 2 0
+0 4 0
+1 3 0
+1 5 0
+2 3 0
+2 6 0
+3 7 0
+4 5 0
+4 6 0
+5 7 0
+6 7 0
+EndConnect
+\end{verbatim}
+
+
+\section{History}
+\begin{tabular}{|r|l|}
+\hline
+10.6.2003 & initial version \\
+11.9.2003 & version 1.1 , changed from multiple to single tag for particles \\
+3.2.2004 & version 1.2., added 2D/3D indication \\
+\hline
+\end{tabular}

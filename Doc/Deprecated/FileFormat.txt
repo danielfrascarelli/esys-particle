@@ -1,0 +1,11 @@
+
+
+Input File Format for ESyS-Particle
+
+
+v0.01, 10.06.2003
+-------------------
+
+The input is split into 2 Files, one for geometry (.geo), one for material
+properties (.prp). Rationale: Makes it possible to exchange the properties
+independently from the

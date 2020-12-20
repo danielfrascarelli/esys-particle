@@ -1,0 +1,160 @@
+%!TEX root = ../ESyS-ParticleNotes.tex
+
+\chapter{Testing the ESyS-Particle Build} % (fold)
+\label{cha:testing_the_esys_particle_build}
+
+Once ESyS-Particle has been built using all its dependencies, the installation needs to be tested. To do this, run all the tutorial scripts from the ESyS-Particle Tutorial. And insure that it all runs correctly.
+
+These test scripts can all be run together by using a bash script to run one after the other. A few things can be added to the script such as a way to move all the output files into another folder to tidy things up when viewing the results.
+
+An example test script can be seen in Appendix~\ref{app:test_script}.
+
+Once the build has been tested, the installation directories can be renamed so that a new build can be tested. To rename the builds, we can use the following script:
+\begin{lstlisting}[style=inlineBash]
+for name in bin include lib share etc; do
+	mv $name "python_2_6_9_"$name;
+done
+mv esys-particle/install esys-particle/python_2_6_9_install
+mv particle_build esys-particle/python_2_6_9_build
+\end{lstlisting}
+
+Once the files are renamed, we can start the testing process again from Section~\ref{sec:building_the_dependencies}.
+
+\clearpage
+\section{Tested Builds} % (fold)
+\label{sec:tested_builds}
+
+Shown in this section is all the builds with different versions of Boost and Python that has been tested in different systems by the developers.
+
+% COMMENTED OUT AS THIS WAS FOR THE OLD VERSION. HAS BEEN UPDATED WITH TABLES BELOW.
+% \begin{table} [h]
+%     \centering
+%     \begin{tabular}{|c|c|c|c|c|c|c|}
+%     \hline
+%     Python & Boost & Povray  & VTK         & Epydoc      & Built? & Pass Test? \\ \hline
+%     2.6.9  & 1.52  & 3.6.1   & Yes (6.1.0) & Yes (3.0.1) & Yes    & Yes   \\
+%     2.6.9  & 1.52  & 3.7.0   & Yes (6.1.0) & Yes (3.0.1) & \multicolumn{2}{p{0.35\linewidth}|}{Povray can't be installed (Section~\ref{sec:problems_with_povray})}   \\
+%     2.6.9  & 1.55  & 3.6.1   & Yes (6.1.0) & Yes (3.0.1) & Yes    & Yes   \\
+%     2.6.9  & 1.55  & 3.7.0   & Yes (6.1.0) & Yes (3.0.1) & Yes    & Yes   \\
+%     2.7.6  & 1.52  & 3.6.1   & Yes (6.1.0) & Yes (3.0.1) & Yes    & Yes   \\
+%     2.7.6  & 1.55  & 3.7.0   & Yes (6.1.0) & Yes (3.0.1) & Yes    & Yes   \\
+%     % 3.0.1  & 1.55  & 3.7.0   & No          & No          & -      & -     \\
+%     3.1.5  & 1.41  & 3.6.1   & No          & No          & Yes    & Yes   \\
+%     3.1.5  & 1.52  & 3.6.1   & No          & No          & Yes    & Yes   \\
+%     % 3.1.5  & 1.55  & 3.7.0   & No          & No          & -      & -     \\
+%     3.2.5  & 1.47  & 3.6.1   & No          & No          & Yes    & Yes   \\
+%     3.2.5  & 1.52  & 3.6.1   & No          & No          & Yes    & Yes   \\
+%     3.2.5  & 1.55  & 3.7.0   & No          & No          & Yes    & Yes   \\
+%     3.3.5  & 1.47  & 3.6.1   & No          & No          & \multicolumn{2}{p{0.35\linewidth}|}{See Subsection~\ref{sub:error_on_running_script}} \\
+%     3.3.5  & 1.52  & 3.6.1   & No          & No          & Yes    & Yes   \\
+%     % 3.3.5  & 1.55  & 3.7.0   & No          & No          & -      & -     \\
+%     3.4.0  & 1.52  & 3.6.1   & No          & No          & \multicolumn{2}{p{0.35\linewidth}|}{See Subsection~\ref{sub:python_3_4_and_boost_1_52}}   \\
+%     3.4.1  & 1.47  & 3.6.1   & No          & No          & \multicolumn{2}{p{0.35\linewidth}|}{See Subsection~\ref{sub:python_3_4_and_boost_1_52}}   \\
+%     3.4.1  & 1.52  & 3.6.1   & No          & No          & \multicolumn{2}{p{0.35\linewidth}|}{See Subsection~\ref{sub:python_3_4_and_boost_1_52}}   \\
+%     3.4.1  & 1.53  & 3.6.1   & No          & No          & \multicolumn{2}{p{0.35\linewidth}|}{See Subsection~\ref{sub:python_3_4_and_boost_1_52}}   \\
+%     3.4.1  & 1.54  & 3.6.1   & No          & No          & \multicolumn{2}{p{0.35\linewidth}|}{See Subsection~\ref{sub:python_3_4_and_boost_1_52}}   \\
+%     3.4.1  & 1.55  & 3.6.1   & No          & No          & Yes    & Yes   \\
+%     3.4.1  & 1.55  & 3.7.0   & No          & No          & Yes    & Yes   \\ \hline
+%     \end{tabular}
+%     \caption{A list of the builds of ESyS-Particle v2.3 tested on a Debian (jessie) system.}
+% \end{table}
+
+\begin{table} [h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    Python & Boost & Povray & VTK & Epydoc & Built? & Pass Test? & Notes\\ \hline
+    2.6.9  & 1.37  & 3.6.1  & Yes & Yes    & Yes    & Yes        & \\
+    2.6.9  & 1.55  & 3.6.1  & Yes & Yes    & Yes    & Yes        & \\
+    2.7.8  & 1.38  & 3.6.1  & Yes & Yes    & Yes    & Yes        & \\
+    2.7.8  & 1.41  & 3.6.1  & Yes & Yes    & Yes    & Yes        & \\
+    2.7.8  & 1.55  & 3.6.1  & Yes & Yes    & Yes    & Yes        & \\
+    3.0.1  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.1.5  & 1.41  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.1.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.2.5  & 1.47  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.2.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & wide-unicode\\
+    3.2.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & pymalloc \\
+    3.2.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & pydebug \\
+    3.3.5  & 1.47  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.3.5  & 1.52  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.3.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & wide-unicode\\
+    3.3.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & pymalloc \\
+    3.3.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & pydebug \\
+    3.3.5  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.4.1  & 1.47  & 3.6.1  & No  & No     & Yes    & Yes        & \\
+    3.4.1  & 1.55  & 3.6.1  & No  & No     & Yes    & Yes        & \\ \hline
+    \end{tabular}
+    \caption{A list of the builds of ESyS-Particle v2.3.1 tested on a Ubuntu 14.0.4 system. (VTK version 6.1.0 and Epydoc version 3.0.1)}
+\end{table}
+   
+\begin{table} [h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|}
+    \hline
+    Python & Boost & Built? & Pass Test? & Notes \\ \hline
+    2.6.9  & 1.37  & Yes    & Yes        & \\
+    2.7.8  & 1.37  & Yes    & Yes        & \\
+    2.7.8  & 1.55  & Yes    & Yes        & \\
+    3.0.1  & 1.41  & Yes    & Yes        & \\
+    3.0.1  & 1.56  & Yes    & Yes        & \\
+    3.1.5  & 1.41  & Yes    & Yes        & \\
+    3.1.5  & 1.56  & Yes    & Yes        & \\
+    3.2.5  & 1.47  & Yes    & Yes        & \\
+    3.2.5  & 1.47  & Yes    & Yes        & wide-unicode\\
+    3.2.5  & 1.47  & Yes    & Yes        & pymalloc \\
+    3.2.5  & 1.47  & Yes    & Yes        & pydebug \\
+    3.2.5  & 1.55  & Yes    & Yes        & \\
+    3.3.5  & 1.47  & Yes    & Yes        & \\
+    3.3.5  & 1.55  & Yes    & Yes        & \\
+    3.3.5  & 1.55  & Yes    & Yes        & wide-unicode\\
+    3.3.5  & 1.55  & Yes    & Yes        & pymalloc \\
+    3.3.5  & 1.55  & Yes    & Yes        & pydebug \\
+    3.4.1  & 1.47  & Yes    & Yes        & \\
+    3.4.1  & 1.55  & Yes    & Yes        & \\
+    3.4.1  & 1.56  & Yes    & Yes        & \\ \hline
+    \end{tabular}
+    \caption{A list of the builds of ESyS-Particle v2.3.1 tested on a Ubuntu 12.0.4 system. (VTK version 6.1.0 and Epydoc version 3.0.1 for installs with Python 2.x and Povray 3.6.1)}
+\end{table}
+
+\begin{table} [h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    Python & Boost & Built? & Pass Test? \\ \hline
+    2.6.8  & 1.37  & Yes    & Yes   \\
+    2.6.8  & 1.49  & Yes    & Yes   \\
+    2.6.9  & 1.56  & Yes    & Yes   \\
+    2.7.3  & 1.49  & Yes    & Yes   \\
+    2.7.8  & 1.37  & Yes    & Yes   \\
+    2.7.8  & 1.56  & Yes    & Yes   \\
+    3.0.1  & 1.41  & Yes    & Yes   \\
+    3.0.1  & 1.56  & Yes    & Yes   \\
+    3.1.5  & 1.41  & Yes    & Yes   \\
+    3.1.5  & 1.56  & Yes    & Yes   \\
+    3.2.3  & 1.49  & Yes    & Yes   \\
+    3.2.5  & 1.47  & Yes    & Yes   \\
+    3.2.5  & 1.56  & Yes    & Yes   \\
+    3.3.5  & 1.47  & Yes    & Yes   \\
+    3.3.5  & 1.56  & Yes    & Yes   \\
+    3.4.1  & 1.47  & Yes    & Yes   \\
+    3.4.1  & 1.52  & Yes    & Yes   \\ 
+    3.4.2  & 1.56  & Yes    & Yes   \\ \hline
+    \end{tabular}
+    \caption{A list of the builds of ESyS-Particle v2.3.1 tested on a Debian 7.2 with system Boost 1.49.0 and Python 2.6.8, 2.7.3 and 3.2.3. (VTK version 6.1.0 and Epydoc version 3.0.1 for installs with Python 2.x and Povray 3.6.1)}
+\end{table}
+
+\begin{table} [h]
+    \centering
+    \begin{tabular}{|c|c|c|c|p{8cm}|}
+    \hline
+    Python & Boost &  Built? & Pass Test? & Notes \\ \hline
+    2.6.0  & 1.36  &  Yes    & Yes &    These two are the system versions and so are present when the other Boost and Python modules are loaded. \\
+    2.7.3  & 1.51  &  Yes    & Yes &    2-B Unicode \\
+    2.7.3  & 1.55  &  Yes    & Yes &    2-B Unicode \\
+    3.2.2  & 1.55  &  Yes    & Yes &    2-B Unicode \\
+    3.3.5  & 1.47  &  Yes    & Yes &    using icc 12.0.3: ESyS-Particle configuration fell over using newer icc during the Boost compatibility test \\
+    3.4.1  & 1.47  &  Yes    & Yes &    using icc 12.0.3: ESyS-Particle configuration fell over using newer icc during the Boost compatibility test \\  \hline
+    \end{tabular}
+    \caption{A list of the builds of ESyS-Particle v2.3.1 tested on a Suse 11 system with system Boost 1.36.0 and Python 2.6.0. (VTK version 6.1.0 and Epydoc version 3.0.1 for installs with Python 2.x and Povray 3.6.1)}
+\end{table}

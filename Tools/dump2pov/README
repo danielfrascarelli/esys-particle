@@ -1,0 +1,50 @@
+#############################################################
+##                                                         ##
+## Copyright (c) 2003-2017 by The University of Queensland ##
+## Centre for Geoscience Computing                         ##
+## http://earth.uq.edu.au/centre-geoscience-computing      ##
+##                                                         ##
+## Primary Business: Brisbane, Queensland, Australia       ##
+## Licensed under the Open Software License version 3.0    ##
+## http://www.apache.org/licenses/LICENSE-2.0              ##
+##                                                         ##
+#############################################################
+
+dump2pov -i INFILE -t TSTART NT DT -o OUTFILE [-color PARAMS] [-geo PARAMS] [-field NR] [-dir NR]
+
+Convert a number of checkpoint files into povray files.
+
+-i INFILE : the base name of the checkpoints
+-t TSTART NT DT : first checkpoint, nr. of frames (0..NT), time steps between frames
+	
+example:
+---------
+dump2pov -i chk -t 10 2 50 
+would read chk_t=10_0.txt,chk_t=60_0.txt, chk_t=110_0.txt
+
+-o OUTFILE : base name for output files, i.e. if OUTFILE is frame, the output fields are frame0.pov,frame1.pov ....
+
+-field NR : the scalar field used for coloring the particles, currently available:
+  1: x-position
+  2: y-position
+  3: z-position
+  4: radius
+  5: id
+  6: tag
+  7: mass
+  8: initial x-position
+  9: initial y-position
+  10: initial z-position
+  11: x-velocity
+  12: y-velocity
+  13: z-velocity
+  	
+
+-color R1,G1,B1,R2,G2,B2,X1,X2 : field values between X1 and X2 are mapped to
+ a color between the rgb-colors (R1,B1,G1) and (R2,G2,B2)
+
+-geo X1,X2,N,R : "geologic coloring" initial between X1 and X2 are mapped to N
+ alternating light brown/dark brown layers. R (0-1.0) is the amount of 
+ randomness in the layer thickness.
+
+-dir 1 : look along x

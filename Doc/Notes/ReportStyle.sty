@@ -1,0 +1,64 @@
+\ProvidesPackage{ReportStyle}
+\usepackage[UKenglish]{babel}% http://ctan.org/pkg/babel
+\usepackage[T1]{fontenc} % use font encoding for accent stuff
+\usepackage{setspace} %Use \doublespacing or \singlespacing
+
+\usepackage{pdflscape} % To make 1 page landscape
+\usepackage{pdfpages} % To insert pdf files into the main document
+%------------------------------------------------------------------------------
+% IMAGES, TABLES, CAPTIONS, etc
+%------------------------------------------------------------------------------
+\usepackage{graphicx} % To insert graphics/images
+\graphicspath{{./img-files/}}
+\usepackage{wrapfig} % To wrap figures
+\usepackage{pgfgantt} % To do gantt charts
+\usepackage{multirow}
+\parskip=12pt % Sets spacing between paragraphs
+\usepackage{subcaption}
+\usepackage{longtable} % To span tables across multiple pages
+\usepackage{enumitem} % To remove spacing in itemize items
+%------------------------------------------------------------------------------
+% PAGE FORMATTING (HEADER AND FOOTER, etc)
+%------------------------------------------------------------------------------
+% Sets the header and footer sections
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\fancyfoot{} %clears the default fancy footer layout
+%\renewcommand{\footrulewidth}{1pt}
+
+\fancyfoot[RO, LE] {\thepage} % page numbers
+%\fancyfoot[RE, LO]{Justin \textsc{Rahardjo} (42034742)} % my name!!
+
+\fancyhead{} %clears the default fancy header layout
+\fancyhead[RO, LE]{\textit{\rightmark}}
+
+\fancypagestyle{plain}{
+	\fancyhf{} % remove everything
+	\renewcommand{\headrulewidth}{0pt} % remove lines as well
+	%\renewcommand{\footrulewidth}{1pt}
+	\fancyfoot[RO, LE]{\thepage}
+	%\fancyfoot[RE, LO]{Justin \textsc{Rahardjo} (42034742)}
+}
+
+\setlength{\headheight}{15pt}
+% Fixes the problem that an empty page will still have both a header and a footer
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{%
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}%
+}
+\let\cleardoublepage\clearemptydoublepage
+%-------------------------------------------------------------------------------
+% HYPERLINKS
+%-------------------------------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true, %set true if you want colored links
+    allcolors=black,  %choose some color if you want links to stand out
+   	%linktocpage %use if want to link page numbers instead of name
+}
+\usepackage[nottoc]{tocbibind} % include bibliography in toc
+%-------------------------------------------------------------------------------
+
+\usepackage{datetime}

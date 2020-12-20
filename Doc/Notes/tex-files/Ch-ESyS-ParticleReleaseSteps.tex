@@ -1,0 +1,79 @@
+%!TEX root = ../ESyS-ParticleNotes.tex
+
+\chapter{ESyS-Particle Release Steps}
+\label{cha:esys_particle_release_steps}
+
+Described in this section is the steps needed to create a new release for ESyS-Particle.
+\begin{enumerate}
+    \item Write release notes at \url{https://wiki.geocomp.uq.edu.au/index.php/Release_Notes_for_ESyS-Particle}
+    \item Update version information in \lstinline{configure.ac}, \lstinline{Doxyfile}, \lstinline{Doc/Tutorial/paper.tex}, \lstinline{Foundation/version.h}
+    \item Update the tutorial if necessary and generate the new PDF file:
+
+    \lstinline{./render.sh} in \lstinline{Doc/Tutorial/}
+    \item Upload the new file to \url{https://wiki.geocomp.uq.edu.au/index.php/File:ESyS-Particle_Tutorial.pdf}
+    \item Update the trunk:
+
+    \lstinline{bzr commit}
+    \item Generate an updated API by building the code using the \lstinline{--with-epydoc} option
+    \item Copy the API to \url{shake200:/data/www/esys/esys-particle_python_doc/esys-particle-2.3.1}
+    \item Generate updated source code documentation:
+
+    \lstinline{doxygen Doxyfile}
+    \item Copy the source code documentation to \url{shake200:/data/www/esys/esys-particle_doxygen_doc/esys-particle-2.3.1}
+    \item Branch from the trunk:
+
+    \lstinline{bzr branch lp:esys-particle source2.3.1}
+    \item Push the new branch to Launchpad:
+
+    \lstinline{bzr push lp:~esys-p-dev/esys-particle/2.3.1}
+    \item Change the new branch status to ``Mature'':
+
+    Code page $\rightarrow$ \lstinline{lp:~esys-p-dev/esys-particle/2.3.1} $\rightarrow$ Status
+
+\end{enumerate}
+
+
+\textit{For major version:}
+\begin{enumerate} \parskip0pt \parsep0pt
+    \itshape
+    \setcounter{enumi}{12}
+    \item Create series 2.3:
+
+    Project overview page $\rightarrow$ Register a series
+    \item Link the mainline branch for the series: 2.3 Series page
+\end{enumerate}
+
+\begin{enumerate}
+    \setcounter{enumi}{14}
+    \item Create a 2.3 series milestone:
+
+    2.3 Series page $\rightarrow$ Create milestone: Name: 2.3.1
+    \item Link fixed and committed bugs to the milestone, if any exist:
+
+    Bugs page $\rightarrow$ Target to milestone
+    \item Create a 2.3 series release:
+
+    2.3 Series page $\rightarrow$ Create release
+    \item Make a new tarball:
+
+    \lstinline{tar -cavf ESyS-Particle-2.3.1.tar.gz --exclude-vcs *}
+    \item Create a signature for the tarball:
+
+    \lstinline{gpg --armor --sign --detach-sig ESyS-Particle-2.3.1.tar.gz}
+    \begin{itemize}
+    \item if no keys has been defined in the system, generate the keys by using:
+
+    \lstinline{gpg --gen-key}
+    \item and afterwards, the key would need to be uploaded to the server:
+
+    \lstinline{gpg --keyserver `hkp://keys.gnupg.net' --send keys <key-ids>} 
+
+        the key id can be found using: \lstinline{gpg --list-keys}
+    \end{itemize}
+
+    \item Upload the new tarball and signature:
+
+    Milestone page $\rightarrow$ Add download file
+    \item Change the 2.3 series status from ``Active Development'' to ``Current Stable Release'': 2.3 Series page
+    \item Change the status of bugs fixed for the release from ``Fix Committed'' to ``Fix Released'': Bugs page
+\end{enumerate}

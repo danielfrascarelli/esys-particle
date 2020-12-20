@@ -1,0 +1,255 @@
+%!TEX root = ../ESyS-ParticleNotes.tex
+
+\chapter{Building ESyS-Particle}
+\label{cha:building_esys_particle}
+
+\section{Easy Install}
+\label{sec:easy_install}
+
+An extract from \url{https://answers.launchpad.net/esys-particle/+faq/1792}
+
+To install a recent released version of ESyS-Particle on Ubuntu from prebuilt packages, first remove any existing ESyS-Particle installation, and then type in a terminal:
+\begin{lstlisting}[style=inlineBash]
+$ sudo apt-get update
+$ sudo apt-get install esys-particle
+\end{lstlisting}
+
+Or for the latest trunk revision, including the most recent bug fixes:
+\begin{lstlisting}[style=inlineBash]
+$ sudo add-apt-repository ppa:esys-p-dev/daily
+$ sudo apt-get update
+$ sudo apt-get install esys-particle-daily
+\end{lstlisting}
+
+You will get updates automatically during the normal system update procedure.
+
+\section{Guide to a source-build}
+\label{sec:guide_to_a_source_build}
+
+ESyS-Particle needs to be built against:
+\begin{itemize}[noitemsep,nolistsep]
+	\item Python 2.6.x, 2.7.x \& 3.x
+	\item Boost
+	\item Povray
+	\item VTK (currently only supported on Python 2.x)
+	\item epydoc (currently only supported on Python 2.x)
+\end{itemize}
+
+All these packages need to be installed under a directory that is separate from \lstinline{/usr/} and \lstinline{/usr/local/}. This will help in testing the build for each version of the software.
+
+\subsection{Building the dependencies}
+\label{sec:building_the_dependencies}
+
+Firstly, create a new directory to contain the various folders. For the rest of this document, it is assumed that the \lstinline{~/BUILD/} directory is the base directory for the installations.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~
+$ mkdir -p BUILD/sources
+$ cd BUILD
+$ mkdir bin lib share include
+\end{lstlisting}
+
+And don't forget to add these folders to the environment variables. For a more permanent install, add these to the end of the \lstinline{~/.bashrc} file.
+
+\begin{lstlisting}[style=inlineBash]
+$ export PATH=$HOME/BUILD/bin:$PATH
+$ export LD_LIBRARY_PATH=$HOME/BUILD/lib:$LD_LIBRARY_PATH
+$ export LIBRARY_PATH=$HOME/BUILD/lib:$LIBRARY_PATH
+\end{lstlisting}
+
+\subsubsection{Installing Python from Source}
+\label{sub:installing_python_from_source}
+
+Get the Python sourcecode from \url{https://www.python.org/downloads/source/} and place into the base directory. These instructions will be using Python 2.6.9 release. Adjust the commands accordingly to the release required.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD/sources
+$ tar xfz Python-2.6.9.tgz
+$ rm Python-2.6.9.tgz
+$ cd Python-2.6.9
+$ ./configure --prefix=$HOME/BUILD --enable-shared
+$ make
+$ make altinstall
+\end{lstlisting}
+
+NOTE:
+\begin{itemize}[noitemsep,nolistsep]
+	\item \lstinline{--prefix=x} installs all platform-independent files in \lstinline{x/lib}
+	\item \lstinline{--enabled-shared} allows installation of the Python library as a shared object
+	\item \lstinline{make altinstall} allows multiple versions of Python to coexist.
+\end{itemize}
+
+Link the new installation of python and check the link
+\begin{lstlisting}[style=inlineBash]
+$ ln -sf $HOME/BUILD/bin/python2.6 $HOME/bin/python
+$ ln -sf $HOME/BUILD/bin/python2.6-config $HOME/bin/python-config
+$ ls -l `which python`
+\end{lstlisting}
+
+NOTE:
+The command \lstinline{which python} tells you which directory the command python looks for the libraries and binary files. Place the result of this command into the last bash command for above.
+
+\subsubsection{Installing Boost from Source}
+\label{sub:installing_boost_from_source}
+
+Get the Boost sourcecode from \url{http://www.boost.org/users/history/} and place into the base directory. These instructions will be using Boost 1.52.0 release. Adjust the commands accordingly to the release required.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD/sources
+$ tar --bzip2 -xf boost_1_52_0.tar.bz2
+$ rm boost_1_52_0.tar.bz2
+$ cd boost_1_52_0
+$ ./bootstrap.sh --prefix=$HOME/BUILD --with-libraries=filesystem,python,regex,system
+$ ./b2
+$ ./b2 install
+\end{lstlisting}
+
+NOTE:
+When configuring ESyS-Particle, add the \lstinline{--with-boost=x} option where x is your base directory. If your Boost installation results in nonstandard library names (such as the version of the C++ compiler included as part of the Boost library name), the \lstinline{--with-boost-filesystem=} and \lstinline{--with-boost-python=} options will also be needed to configure ESyS-Particle. The string following the \lstinline{=} symbol needs to be the Boost library name without the initial \lstinline{lib} string and without the final \lstinline{.so} extension (for example, \lstinline{--with-boost-python=boost_python-gcc_4_3_3} if the Boost::Python library is called \lstinline{libboost_python-gcc_4_3_3.so}). If the configure script cannot find the correct Python library, rerun the script with this additional option (including the quotation marks): \lstinline{LDFLAGS="-Lx/lib"}.
+
+NOTE: When using Povray 3.7 or higher, include the \lstinline{thread} library when compiling. Please see Section~\ref{sec:problems_with_povray} for more details.
+
+NOTE: When building with Python 3.2 and above (see Section~\ref{sec:problems_with_boost}), remember to include directory to the python headers in the \lstinline{b2} command. Such as \lstinline{./b2 include="~/BUILD/include/python3.xm"}.
+
+\subsubsection{Installing VTK from Source}
+\label{sub:installing_vtk_from_source}
+
+The most up-to-date instructions to install VTK from source can be found at \url{http://www.vtk.org/Wiki/VTK/Configure_and_Build}.
+
+The following instructions will be using CMake 2.8.12 Release and VTK 6.1.0 Release. Adjust the commands accordingly to the release required.
+
+VTK requires CMake to be installed. So, download the source code at \url{http://www.cmake.org/cmake/resources/software.html} and place in the base folder. These instructions go through installation of CMake in the root folder. So that it may be shared with other testing installations. If it is equired to be installed in a certain folder, add \lstinline{--prefix=/install/path} to the configure line.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD/sources
+$ tar xfz cmake-2.8.12.2.tar.gz
+$ cd cmake-2.8.12.2
+$ ./configure
+$ make
+$ make install
+\end{lstlisting}
+
+NOTE: If there is an error about not being able to find the Curses Libraries, install the curses libraries first.
+\begin{lstlisting}[style=inlineBash]
+$ sudo apt-get install libncurses5-dev
+\end{lstlisting}
+
+Once CMake is built, we move onto VTK.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD/sources
+$ tar xfz VTK-6.1.0.tar.gz
+$ mkdir VTK-build
+$ cd VTK-build
+$ ccmake ../VTK-6.1.0
+\end{lstlisting}
+
+In the CCMake GUI, hit [c] to configure for the first time. Then, toggle to advance view [t] and set these values:
+
+\begin{itemize}[noitemsep,nolistsep]
+	\item \lstinline{CMAKE_BUILD_TYPE} - Release
+	\item \lstinline{CMAKE_INSTALL_PREFIX} - the base directory to install VTK in (can't use ``\$HOME'', have to use ``~'' or ``/home/username/'')
+	\item \lstinline{BUILD_SHARED_LIBS} - ON
+	\item \lstinline{VTK_WRAP_PYTHON} - ON
+	\item \lstinline{Module_vtkPython} - ON
+	\item \lstinline{Module_vtkPythonInterpreter} - ON
+\end{itemize}
+
+Once these options are set, hit [c] again to reconfigure, then check these values and make sure it is using the correct python installation of the build.
+
+\begin{itemize}[noitemsep,nolistsep]
+	\item \lstinline{PYTHON_EXECUTABLE} - your python installation (\lstinline{~/BUILD/bin/python})
+	\item \lstinline{PYTHON_INCLUDE_DIR} - (\lstinline{~/BUILD/include/python2.6})
+	\item \lstinline{PYTHON_LIBRARY} - (\lstinline{~/BUILD/lib/libpython2.6.so})
+	\item \lstinline{VTK_INSTAL_PYTHON_MODULE_DIR} - \lstinline{lib/python2.6/site-packages}
+\end{itemize}
+
+Hit [c] to reconfigure again and then hit [g] to generate the required files. Lastly, build VTK.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD/VTK-build
+$ make
+$ make install
+\end{lstlisting}
+
+NOTE: Whilst configuring, there might be an error such as \lstinline{X11_Xt_LIB could not be found}. To fix this problem, simply install the XT library.
+\begin{lstlisting}[style=inlineBash]
+$ sudo apt-get install libxt-dev
+\end{lstlisting}
+
+\subsubsection{Installing Povray from Source}
+\label{sub:installing_povray_from_source}
+
+Get the Povray source from the download page \url{http://www.povray.org/download/index-3.6.php}. This instructions will be using Povray 3.6.1 release. Adjust the commands accordingly to the release required.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD/sources
+$ tar xfz povray-3.6.tar.gz
+$ rm povray-3.6.tar.gz
+$ cd povray-3.6.1
+$ ./configure COMPILED_BY="your name <email@address>" --prefix=$HOME/BUILD 
+$ make
+$ make install
+\end{lstlisting}
+
+NOTE: There might be a problem with \lstinline{libpng12-dev}. If so, remove it and use \lstinline{libpng10-dev} instead.
+
+NOTE: If you are having problems installing Povray 3.7, please see Section~\ref{sec:problems_with_povray}.
+
+\subsubsection{Installing Epydoc from Source}
+\label{sub:installing_epydoc_from_source}
+
+Get the Epydoc source from the website \url{http://epydoc.sourceforge.net/}. This instructions will be using Epydoc 3.0.1 release. Adjust the commands accordingly to the release required.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD/sources
+$ unzip epydoc-3.0.1.zip
+$ rm epydoc-3.0.1.zip
+$ cd epydoc-3.0.1
+\end{lstlisting}
+
+Then use your preferred text editor to change the default installation path in the \lstinline{Makefile} to point to where you'd like epydoc to be installed.
+
+\begin{lstlisting}[style=inlineBash]
+LIB = $HOME/BUILD
+\end{lstlisting}
+
+Then continue on with the installation using the command \lstinline{make install}.
+
+\subsection{Configuring and installing ESyS-Particle}
+\label{sec:configuring_and_installing_esys_particle}
+
+Once all the required dependencies are installed, we can start configuring the esys-particle installation and install it. Firstly, create a directory for the ESyS-Particle source and installation files.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd ~/BUILD
+$ mkdir esys-particle
+$ cd esys-particle
+$ bzr branch lp:esys-particle 
+$ mv esys-particle/ source
+$ mkdir install build
+$ cd source
+$ ./autogen.sh
+$ cd ~/BUILD/esys-particle/build
+$ ../source/configure CC=mpicc CXX=mpic++ CXXFLAGS="-Wall -Wextra" --srcdir=$HOME/BUILD/esys-particle/source --prefix=$HOME/BUILD/esys-particle/install --with-boost=$HOME/BUILD --with-povray --enable-vtk --with-epydoc --enable-docs
+$ make
+$ make install
+\end{lstlisting}
+
+\emph{NOTE: When compiling for Python 3.x, remember that  both vtk and epydoc are not supported and thus remove \lstinline{--enable-vtk} and \lstinline{--with-epydoc} in the configure command.}
+
+\emph{NOTE: Remember to uninstall previous version of ESyS-Particle before installing the new one. As sometimes during make, a few errors come up when the previous installations is conflicting.}
+\begin{lstlisting}[style=inlineBash]
+$ cd old/esys/source/dir
+$ sudo make uninstall
+$ make distclean
+\end{lstlisting}
+
+And lastly, don't forget to add the ESyS-Particle installation paths to your environment variables.
+
+\begin{lstlisting}[style=inlineBash]
+$ export PATH=$HOME/BUILD/esys-particle/install/bin:$PATH
+$ export LD_LIBRARY_PATH=$HOME/BUILD/esys-particle/install/lib:$LD_LIBRARY_PATH
+$ export LIBRARY_PATH=$HOME/BUILD/esys-particle/install/lib:$LIBRARY_PATH
+$ export PYTHONPATH=$HOME/BUILD/esys-particle/install/lib/pythonx.x/site-packages/:$PYTHONPATH
+\end{lstlisting}

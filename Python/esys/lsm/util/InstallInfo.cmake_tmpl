@@ -1,0 +1,50 @@
+"""
+Provides install path infomation.
+"""
+import os
+from esys.lsm.util.pathSearcher import PathSearcher
+
+installDir   = "${CMAKE_INSTALL_PREFIX}"
+binDir       = os.path.join(installDir, "bin")
+libDir       = os.path.join(installDir, "lib")
+
+pythonPkgDir = "${CMAKE_INSTALL_PREFIX}lib/python2.7/dist-packages"
+esysPkgDir   = os.path.join(pythonPkgDir, "esys")
+lsmPkgDir    = os.path.join(esysPkgDir, "lsm")
+
+pkgName      = "@PROJECT_NAME@"
+version      = "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}"
+pkgHomePageUrl = "https://launchpad.net/esys-particle/"
+pkgDataDir   = "${CMAKE_INSTALL_PREFIX}share/esys-particle/"
+povrayExe    = "no" # to be made configurable
+
+_haveVtk     = False # to be made configurable
+_havePovray  = False # to be made configurable
+
+def getPovrayExePath():
+    """
+    Attempts to return the absolute path of the "povray" executable
+    using the "PATH" environment variable. If the exe can't be found
+    on the "PATH" then this function returns the "povray" path which
+    was found during installation. This function is a workaround for
+    for the SGI MPT mpirun, which seems to alter the user "PATH"
+    environment.
+    """
+    absPath=PathSearcher().find("povray")
+    if ((absPath == None) or (absPath == "")):
+        absPath = povrayExe
+
+    return absPath
+
+def getDataFilePath(dataFileName):
+    """
+    Returns path for specified data file. Looks on path
+    C{{L{{pkgDataDir}}:Data:.}}
+    """
+    return PathSearcher(pkgDataDir+":Data:.").which(dataFileName)
+
+def haveVtk():
+    return _haveVtk
+
+def havePovray():
+    return _havePovray

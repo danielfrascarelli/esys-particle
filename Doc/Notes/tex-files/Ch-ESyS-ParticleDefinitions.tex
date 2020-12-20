@@ -1,0 +1,108 @@
+%!TEX root = ../ESyS-ParticleNotes.tex
+
+\chapter{Definitions and Concepts of Parameters and How-Tos}
+\label{cha:definitions_and_concepts_of_parameters}
+
+A few notes on the definitions and concepts of some parameters used in one or both of ESyS-Particle and GenGeo as well as How-To notes.
+
+\section{Masks}
+\label{sec:masks}
+
+This is essentially a bitwise-mask that is applied to the particle tags. The default value of -1 means that no mask is applied.
+
+\begin{table}
+    \centering
+    \begin{subtable}{0.3\textwidth}
+        \centering
+        \begin{tabular}{|ccc|c|}
+            \hline
+            \multicolumn{3}{|c|}{Binary} & Roman \\ \hline
+            1 & 0 & 0 & 1 \\
+            0 & 1 & 0 & 2 \\
+            1 & 1 & 0 & 3 \\
+            0 & 0 & 1 & 4 \\
+            1 & 0 & 1 & 5 \\
+            0 & 1 & 1 & 6 \\
+            1 & 1 & 1 & 7 \\ \hline
+        \end{tabular}    
+        \caption{mask = -1}
+    \end{subtable}
+    \begin{subtable}{0.3\textwidth}
+        \centering
+        \begin{tabular}{|ccc|c|}
+            \hline
+            \multicolumn{3}{|c|}{Binary} & Roman \\ \hline
+        \rowcolor{light-gray} 1 & 0 & 0 & 1 \\
+            0 & 1 & 0 & 2 \\
+        \rowcolor{light-gray}    1 & 1 & 0 & 3 \\
+            0 & 0 & 1 & 4 \\
+        \rowcolor{light-gray}    1 & 0 & 1 & 5 \\
+            0 & 1 & 1 & 6 \\
+        \rowcolor{light-gray}    1 & 1 & 1 & 7 \\ \hline
+        \end{tabular}   
+        \caption{mask = 1}
+    \end{subtable}    
+    \begin{subtable}{0.3\textwidth}
+        \centering
+        \begin{tabular}{|ccc|c|}
+            \hline
+            \multicolumn{3}{|c|}{Binary} & Roman \\ \hline
+            1 & 0 & 0 & 1 \\
+            \rowcolor{light-gray}0 & 1 & 0 & 2 \\
+            \rowcolor{light-gray}1 & 1 & 0 & 3 \\
+            0 & 0 & 1 & 4 \\
+            1 & 0 & 1 & 5 \\
+            \rowcolor{light-gray}0 & 1 & 1 & 6 \\
+            \rowcolor{light-gray}1 & 1 & 1 & 7 \\ \hline
+        \end{tabular}    
+        \caption{mask = 2}
+    \end{subtable}
+    \caption{Binary to Roman table}
+    \label{tbl:maskingexample}
+\end{table}
+
+The way bitmasking works is that it masks the positions in the binary value. For example, when the given mask is 1, it only selects those with a value of 1 in the first position of the binary. And as such, will return tags with numbers 1, 3, 5, 7 and so on. Whereas when the given mask is 2, it selects those with value of 1 in the second position of the binary, thus returning the tags with numbers 2, 3, 6, 7 and so on.  Table~\ref{tbl:maskingexample} shows the masked bits and the positions of the binary, giving a clearer description of the process.
+
+
+\section{Dump2VTK}
+\label{sec:dump2vtk}
+
+Converting ESyS-Particle's checkpointer output files into VTK files for viewing in Paraview.
+
+\begin{lstlisting}[style=inlineBash]
+$ dump2vtk -i -o -t tini numsnap deltat [-list] [-bkrlist] [-t0]    [-sz] [-rxb] [-single_tag] [-rot] [-unwrap] 
+\end{lstlisting}
+
+Options and their arguments \footnote{\url{http://scientificandhpcomputing.blogspot.com.au/2009/07/dump2vtk-tips-tricks.html}}:
+
+\begin{itemize}
+\item \lstinline{i}: setup the \lstinline{CheckPointer fileNamePrefix}, which should be equal to the fileNamePrefix defined in the CheckPointPrms class.
+
+\item \lstinline{o}: setup the VTK output \lstinline{fileNamePrefix}
+
+\item \lstinline{t}: define the initial recording time step (\lstinline{tini}), the total number of snapshots that you want to produce (\lstinline{numsnap}) and the gap between two recording time steps, i.e., the interval (in time steps) between two CheckPointer files (\lstinline{deltat}), such that dump2vtk knows which CheckPointer file to convert next.
+
+\item \lstinline{list}: instead of constructing the list of input files starting from the CheckPointer fileNamePrefix and from the arguments of the option -t, it takes as input a list of files
+
+\item \lstinline{brklist}: not yet analyzed
+
+\item \lstinline{t0}: not yet analyzed
+
+\item \lstinline{sz}: take only a slice Z = constant
+
+\item \lstinline{rxb}: not yet analyzed
+
+\item \lstinline{single_tag}: not yet analyzed
+
+\item \lstinline{rot}: flag for indicating that the particles are rotational 
+\end{itemize}
+
+For most usecases, with checkpointer files that are in the format of:
+\begin{centering}
+    \lstinline{<CheckPointer fileNamePrefix>_t=????_ID.txt}
+\end{centering}
+
+The following command will suffice:
+\begin{lstlisting}[style=inlineBash]
+$ dump2vtk -i <CheckPointer fileNamePrefix> -o snaps_ -t 0 26 10000 -rot
+\end{lstlisting}

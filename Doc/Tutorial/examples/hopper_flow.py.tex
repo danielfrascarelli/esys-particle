@@ -1,0 +1,184 @@
+\subsection{\texttt{hopper\_flow.py}}\label{code:hopper_flow}
+\begin{verbatim}
+#hopper_flow.py: A hopper flow simulation with mesh walls using
+#                ESyS-Particle
+#       Author: W. Hancock
+#       Date: 10 July 2009
+#       Organisation: ESSCC, University of Queensland
+#       (C) All rights reserved, 2009.
+#
+#
+#import the appropriate ESyS-Particle modules:
+from esys.lsm import *
+from esys.lsm.util import *
+from esys.lsm.geometry import *
+
+#instantiate a simulation object and
+#initialise the neighbour search algorithm:
+sim = LsmMpi (numWorkerProcesses = 1, mpiDimList = [1,1,1])
+sim.initNeighbourSearch (
+   particleType = "NRotSphere",
+   gridSpacing = 2.5000,
+   verletDist = 0.1000
+)
+
+#specify the number of timesteps and the timestep increment:
+sim.setNumTimeSteps (100000)
+sim.setTimeStepSize (1.0000e-04)
+
+#specify the spatial domain for the simulation:
+domain = BoundingBox(Vec3(-20,-20,-20), Vec3(20,20,20))
+sim.setSpatialDomain(domain)
+
+#construct a block of particles with radii in range [0.2,0.5]:
+geoRandomBlock = RandomBoxPacker (
+   minRadius = 0.2000,
+   maxRadius = 0.5000,
+   cubicPackRadius = 2.2000,
+   maxInsertFails = 1000,
+   bBox = BoundingBox(
+      Vec3(-5.0000, 0.0000,-5.0000),
+      Vec3(5.0000, 10.0000, 5.0000)
+   ),
+   circDimList = [False, False, False],
+   tolerance = 1.0000e-05
+)
+geoRandomBlock.generate()
+geoRandomBlock_particles = geoRandomBlock.getSimpleSphereCollection()
+
+#add particles to simulation one at a time,
+#tagging those in layers of 2m
+for pp in geoRandomBlock_particles:
+   centre = pp.getPosn()
+   Y = centre[1]
+   if (int(Y%4) < 2):
+      pp.setTag(1) # layer 1
+   else:
+      pp.setTag(2) # layer 2
+   sim.createParticle(pp) # add the particle to the simulation object
+
+#add a wall as a floor for the model:
+sim.readMesh(
+   fileName = "floorMesh.msh",
+   meshName = "floor_mesh_wall"
+)
+
+#add a left side wall to the model:
+sim.createWall (
+   name = "left_wall",
+   posn = Vec3(-5.0000, 0.0000, 0.0000),
+   normal = Vec3(1.0000, 0.0000, 0.0000)
+)
+
+#add a right side wall to the model:
+sim.createWall (
+   name = "right_wall",
+   posn = Vec3(5.0000, 0.0000, 0.0000),
+   normal = Vec3(-1.0000, 0.0000, 0.0000)
+)
+
+#add a back wall to the model:
+sim.createWall (
+   name = "back_wall",
+   posn = Vec3(0.0000, 0.0000, -5.0000),
+   normal = Vec3(0.0000, 0.0000, 1.0000)
+)
+
+#add a front wall to the model:
+sim.createWall (
+   name = "front_wall",
+   posn = Vec3(0.0000, 0.0000, 5.0000),
+   normal = Vec3(0.0000, 0.0000, -1.0000)
+)
+
+#specify that particles undergo frictional interactions:
+sim.createInteractionGroup (
+   NRotFrictionPrms (
+      name = "friction",
+      normalK = 1000.0,
+      dynamicMu = 0.6,
+      shearK = 100.0,
+      scaling = True
+   )
+)
+
+#specify that particles undergo elastic repulsion
+#with the floor mesh wall:
+sim.createInteractionGroup (
+   NRotElasticTriMeshPrms (
+      name = "floorWall_repell",
+      meshName = "floor_mesh_wall",
+      normalK = 1.0000e+04
+   )
+)
+
+#specify that particles undergo elastic repulsion
+#from the left side wall:
+sim.createInteractionGroup (
+   NRotElasticWallPrms (
+      name = "lw_repell",
+      wallName = "left_wall",
+      normalK = 1.0000e+04
+   )
+)
+#specify that particles undergo elastic repulsion
+#from the right side wall:
+sim.createInteractionGroup (
+   NRotElasticWallPrms (
+      name = "rw_repell",
+      wallName = "right_wall",
+      normalK = 1.0000e+04
+   )
+)
+
+#specify that particles undergo elastic repulsion
+#from the back wall:
+sim.createInteractionGroup (
+   NRotElasticWallPrms (
+      name = "bw_repell",
+      wallName = "back_wall",
+      normalK = 1.0000e+04
+   )
+)
+
+#specify that particles undergo elastic repulsion
+#from the front wall:
+sim.createInteractionGroup (
+   NRotElasticWallPrms (
+      name = "fw_repell",
+      wallName = "front_wall",
+      normalK = 1.0000e+04
+   )
+)
+
+#specify the direction and magnitude of gravity:
+sim.createInteractionGroup (
+   GravityPrms (
+      name = "gravity",
+      acceleration = Vec3(0.0000, -9.8100, 0.0000)
+   )
+)
+
+#add viscosity to damp particle oscillations:
+sim.createInteractionGroup (
+   LinDampingPrms (
+      name = "viscosity",
+      viscosity = 0.1000,
+      maxIterations = 100
+   )
+)
+
+#add a CheckPointer to store simulation data:
+sim.createCheckPointer (
+   CheckPointPrms (
+      fileNamePrefix = "flow_data",
+      beginTimeStep = 0,
+      endTimeStep = 100000,
+      timeStepIncr = 1000
+   )
+)
+
+#execute the simulation:
+sim.run()
+\end{verbatim}
+

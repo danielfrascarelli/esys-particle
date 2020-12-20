@@ -1,0 +1,676 @@
+%% ESyS-Particle Reference Manual
+
+\documentclass{report}
+
+\begin{document}
+\title{ESyS-Particle Scripting Reference Manual}
+\author{Steffen Abe}
+\date{\today}
+\maketitle
+\tableofcontents
+
+\chapter{Introduction}
+\chapter{Functions}
+
+\section{Initialization and Setup}
+
+\subsection{makeLattice}
+
+\textsf{makeLattice(ParticleType, $\mathsf{dt}$, nrange, $\mathsf{\alpha}$ )}
+\par \medskip
+
+Set the basic parameters of the Model. The parameters are:
+\begin{itemize}
+\item \textbf{ParticleType} : The type of particle used in the model. Currently supported are :
+\begin{itemize}
+\item ``Basic'' a spherical, non-rotational particle with 3 (translational) degrees of freedom
+\item \textit{planned} ``Rotational'' a spherical particle with 6 (translational + rotational) degrees of freedom. 
+\end{itemize}   
+\item $\mathbf{dt}$ : The time step used in the time integration scheme.
+\item \textbf{nrange}  and $\mathbf{\alpha}$ : The parameters determining the search range of the neighbor table. nrange is the cut-off for individual particle pairs to be added to a dynamic interaction group. The neighbour table is rebuilt if any particle moves further than $\alpha / 2 $ since the last rebuild.
+\end{itemize}
+ 
+%% --- setProcessDims ----
+\subsection{setProcessDims}
+
+\textsf{setProcessDim(nx,ny,nz)}
+\par \medskip
+
+Set the process dimensions. 
+
+%% --- setSpatialDomain ---
+\subsection{setSpatialDomain}
+
+\textsf{setSpatialDomain($x_{min}$,$y_{min}$,$z_{min}$,$x_{max}$,$y_{max}$,$z_{max}$)}
+\par \medskip
+
+%% --- readGeometryFile ----
+\subsection{readGeometryFile}
+
+\textsf{readGeometryFile(FileName)}
+\par \medskip
+Read in a geometry description file and initialize the model accordingly. The parameter is:
+\begin{itemize}
+\item \textbf{FileName} The name of the geometry file. It has to be either relative to the directory from which the program is run or an absolute pathname.  
+\end{itemize}
+For a description the format of the geometry file see \textit{Doc/FileFormat.tex} in the source distribution. 
+
+\subsection{readMeshFile}
+\label{sec:readMeshFile}
+\textsf{resdMeshFile(MeshName,FileName)}
+\par \medskip 
+Read a mesh file in Finley format and setup a triangle mesh.
+\begin{itemize}
+\item \textbf{MeshName} The name under which the mesh made accessible.
+\item \textbf{FileName} The name of the mesh file. It has to be either relative to the directory from which the program is run or an absolute pathname.  
+\end{itemize}
+ 
+\subsection{tagParticleNearestTo}
+
+\textsf{tagParticleNearestTo(tag,mask,x,y,z)}
+\par \medskip
+Tag the particle closest to a given position.
+\begin{itemize}
+\item \textbf{tag}
+\item \textbf{mask}
+\item \textbf{x,y,z}
+\end{itemize}
+
+\section{Interactions}
+
+
+\subsection{AddPairInteractions}
+
+\textsf{AddPairInteractions(InteractionType, InteractionName, InteractionParameters)}
+\par \medskip
+
+Add a group of interactions between pairs of particles to the model. The InteractionType determines the number and format of the InteractionParameters. The parameters are:
+\begin{itemize}
+\item \textbf{InteractionType} : The type of interaction. \par
+\begin{tabular}{|l|l|}
+\hline
+Type of interaction & Supported Particle Type \\
+\hline
+\hline
+Elastic & Basic \\
+\hline
+Friction & Basic \\
+\hline
+FractalFriction & Basic \\
+\hline
+AdhesiveFriction & Basic \\
+\hline
+\end{tabular} 
+
+\item \textbf{InteractionName}
+\item \textbf{InteractionParameters} The parameters for the interaction. The number and format of the parameters depends on the type of interaction.
+\begin{itemize}
+
+\item Elastic : k
+\begin{itemize}
+\item k : The spring constant for the elastic interaction
+\end{itemize}
+
+\item Friction : k, $\mu$, $k_s$,dt \\
+Constant Coulomb friction. Implementation follow standard Cundall \& Strack DEM approach
+\begin{itemize}
+\item k - elastic spring constant
+\item $\mu$ - coefficient of friction
+\item $k_s$ - shear stiffness (Cundall)
+\item dt - time step
+\end{itemize}
+
+\item FractalFriction : k, $\mu$, $k_s$, dt \\
+\textit{there are some problems with fractal friction currently (hardcoded filename)}
+\begin{itemize}
+\item k - elastic spring constant
+\item $\mu$
+\item $k_s$
+\item dt
+\end{itemize}
+
+\item AdhesiveFriction : k, $\mu$, $k_s$, dt, $r_{cut}$ \\
+Coulomb friction with some adhesion added in. For $r_{ij} < r_0$ it is identical to normal friction, for $r_0 \le r_{ij} \le r_{cut}$ there is no friction but an attractive elastic force.
+\begin{itemize}
+\item k - elastic spring constant
+\item $\mu$ - coefficient of friction
+\item $k_s$ - shear stiffness (Cundall)
+\item dt - time step
+\item $r_{cut}$ - cutoff distance for adhesive elastic interactions 
+\end{itemize} 
+
+\end{itemize}
+\end{itemize}
+
+\subsection{AddBondedInteractions}
+
+\textsf{AddBondedInteractions(Tag, InteractionName, $k$, $r_{break}$)}
+\par \medskip
+Generate a group of bonded interactions from the interaction list read from the geometry file. Only interactions with a given tag will be added to the group.
+\begin{itemize}
+\item \textbf{Tag} : The tag of the interactions which should be in this group 
+\item \textbf{InteractionName} : The name of the generated interaction group
+\item \textbf{$k$} : the elastic spring constant
+\item \textbf{$r_{break}$} : the relative extension at which a bond breaks  
+\end{itemize} 
+
+\subsection{AddRotPairInteractions}
+
+\textsf{AddRotPairInteractions(InteractionType, InteractionName, InteractionParameters)}
+\par \medskip
+
+Add a group of interactions between pairs of particles to the model.
+The InteractionType determines the number and format of the InteractionParameters.
+The parameters are:
+\begin{itemize}
+  \item \textbf{InteractionType} : The type of interaction. \par
+  \begin{tabular}{|l|l|}
+  \hline
+  Type of interaction & Supported Particle Type \\
+  \hline
+  \hline
+  RotElastic & Rot \\
+  \hline
+  RotFriction & Rot \\
+  \hline
+  \end{tabular} 
+
+  \item \textbf{InteractionName} Name of the interaction.
+  \item \textbf{InteractionParameters} The parameters for the interaction.
+    The number and format of the parameters depends on the type of interaction.
+    \begin{itemize}
+      \item Elastic : k
+      \begin{itemize}
+        \item k : The spring constant for the elastic interaction
+      \end{itemize}
+
+      \item RotFriction : $k$, $\mu_s$, $\mu_d$, $k_s$, $\delta t$ \\
+      Constant Coulomb friction. Implementation follow standard Cundall \& Strack DEM approach
+      \begin{itemize}
+        \item $k$ - elastic spring constant
+        \item $\mu_s$ - static coefficient of friction
+        \item $\mu_d$ - dynamic coefficient of friction
+        \item $k_s$ - shear stiffness (Cundall)
+        \item $\delta t$ - time step
+      \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\subsection{AddRotBondedInteractions}
+\label{sec::AddRotBondedInteractions}
+
+\newcommand{\brkForce}[1]{f^{\rm max}_{#1}}
+\newcommand{\brkTorque}[1]{t^{\rm max}_{#1}}
+\textsf{AddRotBondedInteractions(Tag, InteractionName, $k_r$, $k_s$, $k_t$, $k_b$, $\brkForce{r}$, $\brkForce{s}$, $\brkForce{t}$, $\brkForce{b}$)}
+Generate a group of rotational bonded interactions from the interaction
+list read from the geometry file. Only interactions with a given tag
+will be added to the group.
+\begin{itemize}
+\item{\textbf Tag}
+\item{\textbf InterationName}
+\item{$k_r$} : radial (normal) spring constant,
+\item{$k_s$} : shearing (tangent) spring constant,
+\item{$k_t$} : torsional spring constant,
+\item{$k_b$} : bending spring constant,
+\item{$\brkForce{r}$} : maximum normal force for bond breakage,
+\item{$\brkForce{s}$} : maximum shear force for bond breakage,
+\item{$\brkTorque{t}$} : maximum torsion torque for bond breakage,
+\item{$\brkTorque{b}$} : maximum bending torque for bond breakage.
+\end{itemize}
+
+
+\subsection{AddExclusion}
+\label{sec::AddExclusion}
+
+\textsf{AddExclusion(InteractionName1, InteractionName2)}
+\par \medskip
+Prevent particle pair which are in one interaction group to be also in another interaction group. An common example would be that two particles which are linked together, i.e. the pair is in a bonded interaction group, can not also be in elastic or frictional interaction.
+The parameters are:
+\begin{itemize}
+\item \textbf{InteractionName1} : The name of the interaction group the pair is excluded from.
+\item \textbf{InteractionName2} : The name of the interaction group in which the pair has to be to be excluded from InteractionGroup1
+\end{itemize} 
+
+\subsection{AddDamping}
+
+\textsf{AddDamping(InteractionName, $\nu$, $dt$, $N_{max}$)}
+\par \medskip
+
+%%=== addTriMeshInteraction ===
+\subsection{addTriMeshInteraction}
+
+\textsf{addTriMeshInteactions(InteractionType,InteractionName,MeshName,Parameters)}
+\par\medskip
+Add a group of interactions between a triangle mesh and the particles. The mesh needs to be read in with a call to \textbf{readMeshFile}(see section \ref{sec:readMeshFile}) before.
+
+\begin{itemize}
+\item \textbf{InteractionType} : The type of interaction. \par
+\begin{tabular}{|l|l|}
+\hline
+Type of interaction & Supported Particle Type \\
+\hline
+\hline
+Elastic & Basic \\
+\hline
+\end{tabular}
+
+\item \textbf{InteractionName} The name of the new interaction group
+\item \textbf{MeshName} The name of the mesh (see \ref{sec:readMeshFile}) with wh ich the particles interact
+\item \textbf{InteractionParameters} The parameters for the interaction. The number and format of the parameters depends on the type of interaction.
+\begin{itemize}
+\item Elastic : k
+\begin{itemize}
+\item k : The spring constant for the elastic interaction
+\end{itemize} %% Elastic
+
+\end{itemize} %% parameters
+
+
+\end{itemize}
+
+%%=== addBondedTriMeshInteractions ===
+\subsection{addBondedTriMeshInteractions}
+
+\textsf{addBondedTriMeshInteractions(InteractionName,MeshName,k,$r_{break}$,BuildType,BuildParams)}
+\par\medskip
+Add a group of bonded interactions between a triangle mesh and the particles. The mesh needs to be read in with a call to \textbf{readMeshFile}(see section \ref{sec:readMeshFile}) before.
+
+\begin{itemize}
+\item BuildByTag : tag,mask
+\item BuildByGap : gap
+\end{itemize}
+%%=== SetParticleNonDynamic ===
+\subsection{SetParticleNonDynamic}
+
+\textsf{SetParticleNonDynamic(Tag)}
+\par \medskip
+Make all particles with the given tag non-dynamic, i.e. interactions involving those particles will still generate forces, but the particles will not move in response to this forces. This is achieved by setting $1/mass=0$, i.e. have infinite mass in the calculation of particle acceleration but also have $mass=0$ for the calculation of kinetic energy.
+The parameter is:
+\begin{itemize}
+\item \textbf{Tag} : The tag which the particles need to have.
+\end{itemize}
+
+%%=== SetParticleNonRot ===
+\subsection{SetParticleNonRot}
+
+\textsf{SetParticleNonRot(Tag)}
+\par \medskip
+Make all particles with the given tag non-rotational, i.e. interactions involving those particles will still generate forces, but the particles will not rotate in response to this forces. This is achieved by setting the inverse moment of inertia to 0; 
+The parameter is:
+\begin{itemize}
+\item \textbf{Tag} : The tag which the particles need to have.
+\end{itemize}
+ 
+\section{Walls}
+
+``Walls'' in the Lattice Solid Model are used to represent the boundary conditions of the models .They behave as rigid, planar objects which interact with the particles, but aren't dynamically moving in response to the resulting forces themselves. They could, in a sense be considered to be of infinite mass.  \par
+All the walls generated by initWall and related functions, i.e. initWall (\ref{sec::initWall}), initBondedWall (\ref{sec::initBondedWall}) and initSoftBondedWall(\ref{sec::initSBWall}) will have ids assigned in order of their construction, beginning with 0, i.e. the first call generates the wall with id 0, the second call generates the wall with id 1 and so on.
+
+\subsection{initWall}
+\label{sec::initWall}
+
+\textsf{initWall($P_x$, $P_y$, $P_z$, $N_x$, $N_y$, $N_z$,k)}
+\par \medskip
+Add a infinite, planar, elastic wall with a defined position. The geometry of the wall is described by a point on the plane and the normal vector. Any particles which are in contact with the wall, i.e. the separation between the particle position and the plane is smaller than the particle radius interact with the wall by a repulsive linear elastic interaction, $F=k(r-r_0)\mathbf{n}$ where $F$ is the force applied to the particle, $k$ the spring constant, $r$ the distance between the plane and the particle position, $r_0$ the particle radius and $\mathbf{n}$ the normal vector of the plane. \par
+The parameters are:
+\begin{itemize}
+\item $\mathbf{P_x}$, $\mathbf{P_y}$, $\mathbf{P_z}$ : A point on the plane (x, y and z component).
+\item $\mathbf{N_x}$, $\mathbf{N_y}$, $\mathbf{N_z}$ : The normal vector (x, y and z component).
+\item \textbf{k} : The spring constant for the elastic interactions between the wall and the particles.
+\end{itemize}
+
+\subsection{initBondedWall}
+\label{sec::initBondedWall}
+Add a infinite, planar wall bonded to some particles. The geometry of the wall is described by a point on the plane and the normal vector. 
+
+\textsf{initBondedWall($P_x$, $P_y$, $P_z$, $N_x$, $N_y$, $N_z$,k,Tag)}
+\par\medskip
+The parameters are:
+\begin{itemize}
+\item $\mathbf{P_x}$, $\mathbf{P_y}$, $\mathbf{P_z}$ : A point on the plane (x, y and z component).
+\item $\mathbf{N_x}$, $\mathbf{N_y}$, $\mathbf{N_z}$ : The normal vector (x, y and z component).
+\item \textbf{k} : The spring constant for the elastic interactions between the wall and the particles.
+\item \textbf{Tag}
+\end{itemize}
+
+\subsection{initViscWall}
+\label{sec::initViscWall}
+Add a infinite, planar wall exerting viscous drag to the tagged particles if moved. The geometry of the wall is described by a point on the plane and the normal vector. 
+
+\textsf{initViscWall($P_x$, $P_y$, $P_z$, $N_x$, $N_y$, $N_z$,k,$\nu$,Tag)}
+\par\medskip
+The parameters are:
+\begin{itemize}
+\item $\mathbf{P_x}$, $\mathbf{P_y}$, $\mathbf{P_z}$ : A point on the plane (x, y and z component).
+\item $\mathbf{N_x}$, $\mathbf{N_y}$, $\mathbf{N_z}$ : The normal vector (x, y and z component).
+\item \textbf{k} : The spring constant for the elastic interactions between the wall and the particles.
+\item $\mathbf{\nu}$
+\item \textbf{Tag}
+\end{itemize}
+
+\subsection{initSoftBondedWall}
+\label{sec::initSBWall}
+Add a infinite, planar wall bonded to some particles. The geometry of the wall is described by a point on the plane and the normal vector. The spring coefficients for the interaction between particles and the wall are dependent on the direction.
+
+\textsf{initSoftBondedWall($P_x$, $P_y$, $P_z$, $N_x$, $N_y$, $N_z$,$k_x$,$k_y$,$k_z$,Tag)}
+\par\medskip
+The parameters are:
+\begin{itemize}
+\item $\mathbf{P_x}$, $\mathbf{P_y}$, $\mathbf{P_z}$ : A point on the plane (x, y and z component).
+\item $\mathbf{N_x}$, $\mathbf{N_y}$, $\mathbf{N_z}$ : The normal vector (x, y and z component).
+\item $\mathbf{k_x}$, $\mathbf{k_y}$, $\mathbf{k_z}$ : The spring constants for the bonded elastic interactions between the wall and the particles in x-, y- and z-directions.
+\item \textbf{Tag}
+\end{itemize}
+
+
+\section{Moving things around and applying forces}
+
+\subsection{MoveParticleTo}
+
+
+\subsection{SetParticleVelocity} 
+
+\textsf{SetParticleVelocity(Id,$v_x$,$v_y$,$v_z$)}
+\par\medskip
+
+Set the velocity of a particle to a given value.
+The parameters are:
+\begin{itemize}
+\item \textbf{Id} : the id of the particle
+\item $\mathbf{v_x}$,$mathbf{v_y}$,$mathbf{v_z}$ : the velocity
+\end{itemize}
+ 
+\subsection{moveWall}
+
+\textsf{moveWall(Id,$D_x$, $D_y$, $D_z$)}
+\par\medskip
+
+The parameters are:
+
+\begin{itemize}
+\item \textbf{Id} :
+\item $D_x$, $D_y$, $D_z$ :
+\end{itemize}
+
+
+\subsection{applyForceToWall}
+Apply a given force to a wall. The force is only applied during the current timestep, i.e. the function needs to be called within the Loading function in the script.
+\textit{Not implemented for SoftBonded (\ref{sec::initSBWall}) walls.}
+
+\textsf{applyForceToWall(Id,$F_x$, $F_y$, $F_z$)}
+\par\medskip
+
+The parameters are:
+
+\begin{itemize}
+\item \textbf{Id} : The Id of the wall. 
+\item $F_x$, $F_y$, $F_z$ : The force to be applied (x, y and z component).
+\end{itemize}
+
+\subsection{setVelocityOfWall}
+
+\section{Saving Stuff}
+
+\subsection{Fields Overview}
+
+The fields which can be saved are distinguished by two properties: the objects they are defined on, i.e. particles or interactions and the data type of the field, i.e. scalar or vector (tensor to come). 
+
+\subsection{Available Fields}
+        
+\subsubsection{Fields available on Particles}
+\par \medskip
+
+\begin{tabular}{|l|p{3.5cm}|l|p{2.5cm}|}
+\hline
+Name & Field & Data type & Supported Particle Types \\
+\hline \hline
+\verb{e_kin{ & kinetic energy & scalar & Basic \\
+\hline
+\verb{displacement{ & total displacement & vector & Basic \\
+\hline
+\verb{velocity{ & linear velocity & vector & Basic \\
+\hline 
+\verb{v_abs{ & absolute value of linear velocity & scalar & Basic \\
+\hline 
+\verb{force{ & force applied to the particle & vector & Basic \\
+\hline
+\end{tabular}
+
+\subsubsection{Fields available on Interactions}
+\par \medskip
+
+\begin{tabular}{|l|p{2.6cm}|l|p{2.5cm}|c|}
+\hline
+Name & Field & Data type & Supported Interaction Types & checked\\
+\hline \hline
+\verb{potential_energy{ & potential energy & scalar & Bonded, Friction, FractalFriction &\\
+\hline
+\verb{slipping{ & number of frictional interactions in a dynamic state & scalar & Friction, FractalFriction &\\
+\hline
+\verb{F_fric{ & current frictional force & scalar & Friction & x \\
+\hline
+\verb{muF_n{ & product of coefficient of friction and normal force & scalar & Friction & x \\
+\verb{F_fric{ & current frictional force & scalar & Friction & x \\
+\hline
+\verb{strain{ & relative strain on interaction, compression positive & scalar & Bonded & \\ 
+\hline
+\end{tabular}
+
+\subsubsection{Fields available on Triangles}
+\par \medskip
+
+\begin{tabular}{|l|p{3.5cm}|l|}
+\hline
+Name & Field & Data type \\
+\hline \hline
+\verb{force{ & total force & vector \\
+\hline
+\verb{pressure{ & pressure & scalar \\
+\hline
+\end{tabular}
+
+
+\subsection{Output Formats}
+\label{sec::OutputFormats}
+
+All field can be saved in different formats. The following formats are currently supported:
+   
+\begin{itemize}
+\item \textbf{DX} : The complete field is saved in one OpenDX compatible file for each timestep. For particle based fields  the position of the particle and the value of the field at that particle are saved. For interaction based fields the position of the centre of the interaction, i.e. in case of a 2-particle interaction the middle point between the particles, and the value of the field for this interaction is saved.
+\item \textbf{SUM} : The sum over all data in the field is saved into one continuous file, one value per timestep.
+\item \textbf{MAX} : The maximum over all data in the field is saved into one continuous file, one value per timestep. 
+\item \textbf{RAW\_SERIES} : The complete field is saved in one file, one row of values per time step. \textit{not yet implemented for interaction fields} 
+\end{itemize}
+
+\section{Fields Defined on Interactions} 
+
+\subsection{addScalarInteractionFieldSaver}
+\textsf{addScalarInteractionFieldSaver(FileName, FieldName, InteractionType, InteractionName, SaveType, $T_0$, $T_{max}$, $dT$)}
+\par \medskip
+Add a saver for a scalar field defined on an interaction. The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{InteractionType} The type of the interaction for which the field is saved.
+\item \textbf{InteractionName} The name of the interaction group for which the field is saved.
+\item \textbf{SaveType} The way the field is saved. Currently supported are ``DX'', ``SUM'' and ``MAX''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings. For example if $T_0$=1, $T_{max}$=31 and $dT$=5 the field would be saved for the timesteps 1,6,11,16,21,26,31.
+\end{itemize}
+
+\subsection{addTaggedScalarInteractionFieldSaver}
+\label{sec::TaggedSIFSaver}
+\textsf{addTaggedScalarInteractionFieldSaver(FileName, FieldName, InteractionType, InteractionName, SaveType, $T_0$, $T_{max}$, $dT$,Tag,Mask)}
+\par \medskip
+
+Add a saver for a scalar field defined on an interaction. The field is only saved for interaction involving at least one particle with a tag fulfilling the given criteria. The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{InteractionType} The type of the interaction for which the field is saved.
+\item \textbf{InteractionName} The name of the interaction group for which the field is saved.
+\item \textbf{SaveType} The way the field is saved. Currently defined are ``DX'', ``SUM'' and ``MAX''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings. 
+\item \textbf{Tag} The particle tag.
+\item \textbf{Mask} The mask used in the tag comparison, i.e. a interaction is included if for at least one of the particles involved the following is true: $(particle->getTag() | Mask ) == (Tag | Mask)$, i.e. the mask is used to determine which bits in the tag are compared. For example if Tag=5 (binary 101) and Mask=4 (binary 100), particles with a tag in which bit 3 is 1 would be used, i.e. 5 (101) or 6 (110), but not 8 (1000). A Mask of -1 (binary all 1) will lead to an exact comparison of the tags.     
+\end{itemize}
+
+\subsection{addCheckedScalarInteractionFieldSaver}
+
+\textsf{addCheckedScalarInteractionFieldSaver(FileName, FieldName, InteractionType, InteractionName, SaveType, $T_0$, $T_{max}$, $dT$)}
+\par \medskip
+
+Add a saver for a checked scalar field defined on an interaction, i.e. the field is only saved for interactions where the field access function returns ``true''.  The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{InteractionType} The type of the interaction for which the field is saved.
+\item \textbf{InteractionName} The name of the interaction group for which the field is saved.
+\item \textbf{SaveType} The way the field is saved. Currently supported are ``DX'', ``SUM'' and ``MAX''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings.
+\end{itemize}
+
+
+\subsection{addTaggedCheckedScalarInteractionFieldSaver}
+
+\textsf{addTaggedCheckedScalarInteractionFieldSaver(FileName, FieldName, InteractionType, InteractionName, SaveType, $T_0$, $T_{max}$, $dT$,Tag,Mask)}
+\par \medskip
+
+Checked version of \textsf{addTaggedScalarInteractionFieldSaver} (see \ref{sec::TaggedSIFSaver}). The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{InteractionType} The type of the interaction for which the field is saved.
+\item \textbf{InteractionName} The name of the interaction group for which the field is saved.
+\item \textbf{SaveType} The way the field is saved. Currently defined are ``DX'', ``SUM'' and ``MAX''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings. 
+\item \textbf{Tag} The particle tag.
+\item \textbf{Mask} The mask used in the tag comparison.     
+\end{itemize}
+\subsection{addVectorInteractionFieldSaver}
+
+\textsf{addVectorInteractionFieldSaver(FileName,FieldName,IGType,IGName,SaveType,$t_0$,$t_{end}$,$dt$)}
+
+\subsection{addTaggedVectorInteractionFieldSaver}
+
+\textsf{NOT IMPLEMENTED}
+
+\section{Fields Defined on Particles}
+
+\subsection{addScalarParticleFieldSaver}
+
+\textsf{addScalarParticleFieldSaver(FileName, FileName, SaveType, $T_0$, $T_{max}$, $dt$)}
+\par \medskip
+
+Add a saver for a scalar field defined on the particles. The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{SaveType} The way the field is saved. Currently supported are ``DX'' and ``SUM''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings. For example if $T_0$=1, $T_{max}$=31 and $dT$=5 the field would be saved for the timesteps 1,6,11,16,21,26,31.
+\end{itemize}
+
+\subsection{addTaggedScalarParticleFieldSaver}
+
+\textsf{addTaggedScalarParticleFieldSaver(FileName, FieldName, FileFormat, $T_0$, $T_{max}$, $dt$, Tag, Mask)}
+\par \medskip
+
+Add a saver for a scalar field defined on the particles. The field is only saved for particles with a tag fulfilling the given criteria. The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{SaveType} The way the field is saved. Currently defined are ``DX'' and ``SUM''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings. 
+\item \textbf{Tag} The particle tag.
+\item \textbf{Mask} The mask used in the tag comparison, i.e. the field is saved for particles for which the following is true: $(particle->getTag() | Mask ) == (Tag | Mask)$, i.e. the mask is used to determine which bits in the tag are compared. For example if Tag=5 (binary 101) and Mask=4 (binary 100), particles with a tag in which bit 3 is 1 would be used, i.e. 5 (101) or 6 (110), but not 8 (1000). A Mask of -1 (binary all 1) will lead to an exact comparison of the tags.     
+\end{itemize}
+
+\subsection{addVectorParticleFieldSaver}
+
+\textsf{addVectorParticleFieldSaver(FileName, FieldName, FileFormat, $T_0$, $T_{max}$, $dt$)}
+\par \medskip
+
+Add a saver for a vector field defined on the particles. The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{SaveType} The way the field is saved. Currently supported are ``DX'' and ``SUM''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings. For example if $T_0$=1, $T_{max}$=31 and $dT$=5 the field would be saved for the timesteps 1,6,11,16,21,26,31.
+\end{itemize}
+
+
+\subsection{addTaggedVectorParticleFieldSaver}
+
+\textsf{addTaggedVectorParticleFieldSaver(FileName, FieldName, FileFormat, $T_0$, $T_{max}$, $dt$, Tag, Mask)}
+\par \medskip
+
+Add a saver for a vector field defined on the particles. The field is only saved for particles with a tag fulfilling the given criteria. The parameters are:
+
+\begin{itemize}
+\item \textbf{FileName} : The name of the file into which the field is saved. If the  \textbf{SaveType} is such that the field is saved into a separate file for each time step, for example ``DX'', the \textbf{FileName} is used as the base for forming the individual filenames as FileName.N.Ext, were N is the number of the file (0....$(T_{max}-T_0)/dT$) and Ext the file extension for the SaveType, such as dx for ``DX''.
+\item \textbf{FieldName} : The name of the field to be saved. The name has to be of the fields supported by the Interaction for which it is saved, otherwise an error message will result.
+\item \textbf{SaveType} The way the field is saved. Currently defined are ``DX'' and ``SUM''. See section \ref{sec::OutputFormats}.
+\item \textbf{$T_0$} The first timestep for which the field is saved.
+\item \textbf{$T_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dT$} The number of timesteps between savings. 
+\item \textbf{Tag} The particle tag.
+\item \textbf{Mask} The mask used in the tag comparison, i.e. the field is saved for particles for which the following is true: $(particle->getTag() | Mask ) == (Tag | Mask)$, i.e. the mask is used to determine which bits in the tag are compared. For example if Tag=5 (binary 101) and Mask=4 (binary 100), particles with a tag in which bit 3 is 1 would be used, i.e. 5 (101) or 6 (110), but not 8 (1000). A Mask of -1 (binary all 1) will lead to an exact comparison of the tags.     
+\end{itemize}
+
+\section{Other fields}
+
+\subsection{addVectorTriangleFieldSaver}
+\textsf{addVectorTriangleFieldSaver(FileName,FieldName,MeshName,SaveType,$t_0$,$t_{end}$,$dt$)}
+\par \medskip
+
+Add a saver for a vector field defined on the triangles of a given mesh. The parameters are:
+\begin{itemize}
+\item \textbf{FileName}
+\item \textbf{FieldName}
+\item \textbf{MeshName}
+\item \textbf{SaveType}
+\item \textbf{$t_0$} The first timestep for which the field is saved.
+\item \textbf{$t_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dt$} The number of timesteps between savings. 
+
+\end{itemize}
+
+\subsection{addScalarrTriangleFieldSaver}
+\textsf{addScalarTriangleFieldSaver(FileName,FieldName,MeshName,SaveType,$t_0$,$t_{end}$,$dt$)}
+\par \medskip
+
+Add a saver for a scalar field defined on the triangles of a given mesh. The parameters are:
+\begin{itemize}
+\item \textbf{FileName}
+\item \textbf{FieldName}
+\item \textbf{MeshName}
+\item \textbf{SaveType}
+\item \textbf{$t_0$} The first timestep for which the field is saved.
+\item \textbf{$t_{max}$} The last timestep for which the field is saved.
+\item \textbf{$dt$} The number of timesteps between savings. 
+
+\end{itemize}
+
+\chapter{Examples}
+
+\end{document}

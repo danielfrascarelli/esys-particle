@@ -1,0 +1,91 @@
+\documentclass[pdftex,12pt,a4paper,oneside]{book}
+\usepackage[australian]{babel}
+\usepackage{graphicx,color}
+\usepackage{epsf,verbatim}
+\textheight = 257 true mm
+\textwidth  = 160 true mm
+\hoffset    = -12 true mm
+\voffset    = -30 true mm
+
+\usepackage[pdftex,colorlinks,plainpages=false]{hyperref}
+%\usepackage[style=list,number=page]{glossary}
+%\makeglossary
+
+% \+ permits optional breaking of a word across lines without the 
+% hyphen.
+\newcommand{\+}{\discretionary{}{}{}}
+\newcommand{\link}{\htmladdnormallink}
+
+\begin{document}        % The beginning of the document.
+
+%\bibliographystyle{amsplain}
+
+\title{ESyS-Particle Tutorial and User's Guide \\ Version 2.3.1}
+                                                                                
+\author{D. Weatherley, W. Hancock \& V. Boros\\\small{The University of Queensland}
+\\ S. Abe \\\small{Institute for Geothermal Resource Management}  
+}
+\date{\today}
+
+\maketitle
+
+\section*{Preface}
+This document provides an introduction to Discrete Element Method (DEM) modelling using the ESyS-Particle Simulation Software developed by the \link{Centre for Geoscience Computing}{http://earth.uq.edu.au/centre-geoscience-computing} at \link{The University of Queensland}{http://www.uq.edu.au}. The guide is intended for new users and is written as a step-by-step tutorial on the basic principles and usage of the ESyS-Particle software. Readers are encouraged to obtain \link{a copy of the software}{https://launchpad.net/esys-particle/} and try the examples presented here. Readers are assumed to have had some experience using \link{Python}{http://www.python.org} and to be familiar with the fundamental principles of the DEM. If you have never used Python before, the \link{Python Language Tutorial}{http://docs.python.org/tut/tut.html} is an excellent starting point.
+
+
+\tableofcontents
+
+\listoffigures
+
+%EXAMPLE FOR MAKING GLOSSARY ENTRIES
+%NOAA\glossary{name=NOAA, 
+%description=National Oceanographic and Atmospheric Administration,format=textbf}
+
+%EXAMPLE FOR CITING PAPERS
+%Impact of NTHMP on PTWC~\cite{McCreery2001}
+
+\include{bodytext}
+\include{gengeo}
+\newpage
+\section{Additional ESyS-Particle resources and documentation}
+
+\appendix
+\chapter{Code-listings for tutorial examples}\label{code}
+\section{ESyS-Particle scripts}
+\include{examples/bingle.py}
+\include{examples/bingle_output.py}
+\include{examples/bingle_chk.py}
+\include{examples/bingle_vis.py}
+\include{examples/POVsnaps.py}
+\include{examples/bingle_Runnable.py}
+\include{examples/gravity.py}
+\include{examples/gravity_cube.py}
+\include{examples/slope_fail.py}
+\include{examples/slope_friction.py}
+\include{examples/slope_friction_floor.py}
+\include{examples/slope_friction_walls.py}
+\include{examples/floorMesh.msh}
+\include{examples/hopper_flow.py}
+\include{examples/rot_compress.py}
+\include{examples/WallLoader.py}
+\include{examples/shearcell.py}
+\include{examples/ServoWallLoader.py}
+
+\section{\texttt{GenGeo} examples}\label{sec:geocode}
+\include{examples/simple_box_compact.py}
+\include{examples/smooth_box_compact.py}
+\include{examples/cluster_box.py}
+
+\chapter[Interaction Groups \& Fields]{Tables of ESyS-Particle Interaction Groups and Field Savers}
+\label{tables}
+\include{tables/interaction_groups}
+\include{tables/field_names}
+\chapter{File Formats}
+\include{tables/file_formats}
+\include{tables/file_format_description}
+
+%\bibliography{paper}
+
+%\printglossary
+
+\end{document}          % The end of the document.

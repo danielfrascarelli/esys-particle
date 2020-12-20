@@ -1,0 +1,1009 @@
+\documentclass{manual}
+
+\includeonly{geo-file,dump-file}
+
+\title{ESyS-Particle Users Manual}
+
+\makeindex
+\makemodindex
+
+\author{Shane Latham \\ Steffen Abe}
+
+\authoraddress{
+        ACcESS \\
+        Street address, if you want to use it \\
+        Email: \email{your-email@your.domain}
+}
+
+\date{\today}
+
+\release{1.0.beta1}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+ESyS-Particle is a software package for the simulation of physical processes using the ``Lattice Solid Model'' (LSM), (Mora and Place 1994 \cite{stick-slip}, Mora et al. 2000 \cite{geocomplex}), Place and Mora, 2001 \cite{lsm-packing}, Abe et al. 2004 \cite{lsm-parallel1}). ESyS-Particle  is a particle based model similar to the Discrete Element Model (DEM) developed by Cundall and Strack 1979 \cite{cundall-dem}. 
+%% python interface
+%% support for spherical particles, 3DOF/6DOF
+%% interactions
+%% boundary conditions, walls, meshes
+%% included tools gengeo, dump2pov, dump2vtk
+
+\end{abstract}
+
+\tableofcontents
+
+\chapter{Introduction}
+
+%%------------------------------------------
+%% Particles
+%%------------------------------------------
+\section{Particles}
+
+%%------------------------------------------
+%% Walls
+%%------------------------------------------
+\section{Walls}
+\label{sec:walls}
+
+In the context of ESyS-Particle a ``Wall'' is a infinite, rigid planar object which interacts with the particles, but in general doesn't move itself in response to the forces resulting from those interactions. 
+
+
+%%------------------------------------------
+%% Fields
+%%------------------------------------------
+\section{Fields}
+\subsection{Fields Overview}
+
+
+The fields which can be saved are distinguished by two properties: the objects they are defined on, i.e. particles or interactions and the data type of the field, i.e. scalar or vector (tensor to come). Some fields on interactions are not defined on all particle pairs of an interaction group, such as the slip velocity on frictional interactions which is only defined if the particles actually touch. Those fields are ``checked'' fields, i.e. a value is only returned for the particle pairs for which the fields is defined. The table of interaction fields list which fields are affected.
+
+% general explanation, parameters 
+% one file, multi-file 
+% tagged, checked
+
+\subsection{Field Output Formats}
+\label{sec::OutputFormats}
+
+All field can be saved in different formats. The following formats are currently supported:
+   
+\begin{itemize}
+\item \textbf{DX} : The complete field is saved in one OpenDX compatible file for each timestep. For particle based fields  the position of the particle and the value of the field at that particle are saved. For interaction based fields the position of the centre of the interaction, i.e. in case of a 2-particle interaction the middle point between the particles, and the value of the field for this interaction is saved.
+\item \textbf{SUM} : The sum over all data in the field is saved into one continuous file, one value per timestep.
+\item \textbf{MAX} : The maximum over all data in the field is saved into one continuous file, one value per timestep. 
+\item \textbf{RAW\_SERIES} : The complete field is saved in one file, one row of values per time step. \textit{not yet implemented for interaction fields} 
+\end{itemize}
+\subsection{Fields available on Particles}
+\par \medskip
+
+\begin{tabular}{|l|p{3.5cm}|l|p{2.5cm}|}
+\hline
+Name & Field & Data type & Supported Particle Types \\
+\hline \hline
+\verb{id{ & particle Id & scalar & All \\
+\hline
+\verb{tag{ & particle tag & scalar & All \\
+\hline
+\verb{radius{ & particle radius & scalar & All \\
+\hline
+\verb{e_kin{ & kinetic energy & scalar & All \\
+\hline
+\verb{v_abs{ & absolute value of linear velocity & scalar & All \\
+\hline 
+\verb{displacement{ & total displacement & vector & All \\
+\hline
+\verb{velocity{ & linear velocity & vector & All \\
+\hline 
+\verb{position{ & current position & vector & All \\
+\hline 
+\verb{force{ & force applied to the particle & vector & All \\
+\hline
+\hline
+\verb{e_kin_rot{ & rotational part of the kinetic energy & scalar & RotSphere \\
+\hline
+\verb{e_kin_linear{ & linear part of the kinetic energy & scalar & RotSphere \\
+\hline
+\verb{ang_velocity{ & angular velocity & vector & RotSphere \\
+\hline
+\end{tabular}
+
+%% --- interaction fields ----
+\subsection{Fields available on Interactions}
+\par \medskip
+
+\begin{tabular}{|l|p{2.6cm}|l|p{3.5cm}|c|}
+\hline
+Name & Field & Data type & Supported Interaction Types & checked\\
+\hline \hline
+\verb{count{ & number of interactions in the interaction group & scalar & Elastic, Bonded, RotBonded, Friction, RotFriction, VWFriction& no \\
+\hline
+\verb{potential_energy{ & potential energy & scalar & Elastic, Bonded, RotBonded, Friction, RotFriction, VWFriction & no \\
+\hline
+\verb{e_pot_normal{ & normal component of potential energy & scalar & RotBonded & no \\
+\hline
+\verb{e_pot_shear{ & shear component of potential energy & scalar & RotBonded & no \\
+\hline
+\verb{e_pot_twist{ & twist component of potential energy & scalar & RotBonded & no \\
+\hline
+\verb{e_pot_bend{ & bending component of potential energy & scalar & RotBonded & no \\
+\hline
+\verb{slipping{ & number of frictional interactions in a dynamic state & scalar & Friction, RotFriction, VWFriction& no \\
+\hline
+\verb{sticking{ & number of frictional interactions in a static state & scalar & Friction, RotFriction, VWFriction  & no \\
+\hline
+\verb{f_fric{ & magnitude of current frictional (tangential) force & scalar & Friction, VWFriction & yes \\
+\hline
+\verb{f_normal{ & magnitude of normal force & scalar & Friction & yes \\
+\hline
+\verb{muF_n{ & product of coefficient of friction and normal force & scalar & Friction, VWFriction & yes \\
+\hline
+\verb{v_slip{ & slip velocity, i.e. magnitude of the tangential part of the relatve particle velocity & scalar & Friction, VWFriction& yes \\
+\hline
+\verb{mu_current{ & current coefficient of friction & scalar & VWFriction & yes \\
+\hline
+\verb{strain{ & relative strain on interaction, compression positive & scalar & Bonded & no \\ 
+\hline
+\end{tabular}
+
+\subsubsection{Fields available on Triangles}
+\par \medskip
+
+\begin{tabular}{|l|p{3.5cm}|l|}
+\hline
+Name & Field & Data type \\
+\hline \hline
+\verb{force{ & total force & vector \\
+\hline
+\verb{pressure{ & pressure & scalar \\
+\hline
+\end{tabular}
+
+
+
+
+%%------------------------------------------
+%% Installation
+%%------------------------------------------
+\chapter{Installation}
+
+\section{Preconditions}
+
+The following software needs to be present on the system where ESyS-Particle v. 2.0 is to be installed:
+
+\subsection{Build Tools}
+
+The build process for the ESyS-Particle package relies on the presence of a current version of the autotools, i.e. \textsf{aclocal, autoheader, automake, autoconf } and \textsf{libtool}.  The minimum required versions of these tools are:
+\begin{itemize}
+\item aclocal 1.8.2
+\item autoheader 2.59
+\item automake 1.8.2
+\item autoconf 2.59
+\item libtool 1.5.2
+\end{itemize}
+Later versions should work also. Also, a recent GNU {\sf make} or a compatible make tool is required. The package has been successfully build using GNU {\sf make 3.79} and 3.80. 
+
+\subsection{C++ Compilers}
+
+The ESyS-Particle package requires a recent, standard-compliant C++ compiler. Known to work are:
+\begin{itemize}
+\item GCC 3.2 (on IA32)
+\item GCC 3.3 (on IA32 and IA64)
+\item Intel CC 8.0 (on IA64)
+\end{itemize}
+
+\subsection{Python}
+
+% 2.3 
+
+\subsection{MPI}
+
+\label{subsection::mpi}
+
+ESyS-Particle uses some MPI-2 process management functions. Therefore a MPI implementation which supports at least the relevant parts of the MPI-2 standard, i.e. {\sf MPI_Comm_spawn, MPI_Intercomm_merge} is required. ESyS-Particle has been successfully tested with SGI MPT and with LAM 7.1.1. MPICH at least up to version 1.2.7. is known not to work because it doesn't support MPI-2 dynamic process generation, i.e. {\sf MPI_Comm_spawn}.
+
+\subsection{Libraries}
+%% boost 1.32.0
+%% cppunit 1.10
+
+\subsection{Known Issues}
+\begin{enumerate}
+\item MPI on SuSE Linux: In order to install ESyS-Particle on some recent versions of SuSE Linux it is necessary to install MPI from an external source because the distribution supplied MPI packages do not work. The reason is that the LAM package contains only static but no shared libraries. The MPICH package which is also contained in the distribution doesn't work due to the lack of some MPI-2 functions in MPICH (see \ref{subsection::mpi}).
+\end{enumerate}
+
+\section{Configuring and Building ESyS-Particle}
+
+%%---------------------------------------
+%% USE
+%%---------------------------------------
+\chapter{Use}
+
+\section{A script}
+
+In the most simple case, there are 3 things to do in a Python script for a ESyS-Particle simulation:
+\begin{enumerate}
+\item import the necessary Python modules
+\item define a ``Runnable'' object  
+\item setting up and running the model
+\end{enumerate}
+
+\subsection{The Runnable}
+\subsection{Setting up and Running the Model}
+
+\section{Running the script}
+\subsection{On the SGI Altix}
+
+take stuff from Shanes HTML page
+
+\subsubsection{Running a script from an arbitrary directory}
+
+Use mptrunLsmFile FILENAME.
+
+\chapter{Function Reference}
+
+\section{The Main Simulation Class}
+
+%%-----------------------------------
+%% LsmMpi
+%%-----------------------------------
+\begin{classdesc}{LsmMpi}{numWorkerProcesses, mpiDimList,spawnExe,spawnArgList}
+The fundamental simulation class. 
+
+%%-----------------------------------
+%% LsmMpi.initVerletModel
+%%-----------------------------------
+\begin{methoddesc}{initVerletModel}{particleType, gridSpacing, verletDist}
+
+Initialize the Model with basic parameters. The parameter \var{particleType} specifies the type of particle used in the model. Currently two particle types are supported :
+\begin{itemize}
+\item ``NRotSphere'' a spherical, non-rotational particle with 3 (translational) degrees of freedom
+\item ``RotSphere'' a spherical particle with 6 (translational + rotational) degrees of freedom.
+\end{itemize}   
+The parameters \var{gridSpacing} and \var{verletDist} determine the properties of the neighbor search algorithm. The grid spacing of the neighbor table is given by \var{gridSpacing}. The neighbour table is rebuilt if any particle moves further than  \var{verletDist} since the last rebuild. 
+
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.force2dComputations
+%%-----------------------------------
+\begin{methoddesc}{force2dComputations}{}
+Ensures particles only move in the M{x-y} plane and that rotations only occur about the M{z}-axis. Important in particular in 2D simulation with rotational particles because otherwise limited numerical precision (64bit double) in the calculation of the particle rotation would eventually introduce out-of-plane rotations.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.runTimeStep
+%%-----------------------------------
+\begin{methoddesc}{runTimeStep}{}
+Runs a single step of the time-integration method.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.run
+%%-----------------------------------
+\begin{methoddesc}{run}{}
+Run the simulation until the set number of timesteps is reached. 
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.getLsmVersion
+%%-----------------------------------
+\begin{methoddesc}{getLsmVersion}{}
+
+Return the version string of the ESyS-Particle package. Should be ``2.0''.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setSpatialDomain
+%%-----------------------------------
+\begin{methoddesc}{setSpatialDomain}{theBoundingBox}
+\end{methoddesc}
+
+\begin{methoddesc}{setSpatialDomain}{theBoundingBox,cirDimList}
+\end{methoddesc}
+
+\begin{methoddesc}{setSpatialDomain}{minPt,maxPt}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setTimeStepSize
+%%-----------------------------------
+\begin{methoddesc}{setTimeStepSize}{dt}
+Sets the size of the time step used in the integration method to \var{dt}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.getTimeStepSize
+%%-----------------------------------
+\begin{methoddesc}{getTimeStepSize}{}
+Returns the current time-step size.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.getWorkerSpawnCmd
+%%-----------------------------------
+\begin{methoddesc}{getWorkerSpawnCmd}{}
+Returns the command line string which spawns MPI worker processes.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.getParticleType
+%%-----------------------------------
+\begin{methoddesc}{getParticleType}{}
+A string indicating the type of discrete-element particles in the model.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setNumTimeSteps
+%%-----------------------------------
+\begin{methoddesc}{setNumTimeSteps}{numTimeSteps}
+Sets the maximum number of time-steps for the {\sf un} method to execute to \var{numTimeSteps}. 
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.getNumTimeSteps
+%%-----------------------------------
+\begin{methoddesc}{getNumTimeSteps}{}
+Returns the maximum number of time-steps which will be executed by the {\sf run} method.
+Sets the maximum number of time-steps for the {\sf un} method to execute to \var{numTimeSteps}. 
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.getTimeStep
+%%-----------------------------------
+\begin{methoddesc}{getTimeStep}{}
+Returns the current time-step number (number of time-steps executed so far).
+\end{methoddesc}
+
+
+%%-----------------------------------
+%% LsmMpi.getNumParticles
+%%-----------------------------------
+\begin{methoddesc}{getNumParticles}{}
+Returns the current number of particles in the model.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.createConnections
+%%-----------------------------------
+\begin{methoddesc}{createConnections}{iterable}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.createParticles
+%%-----------------------------------
+\begin{methoddesc}{createParticles}{iterable}
+Creates discrete-element particles within the model.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.createInteractionGroup
+%%-----------------------------------
+\begin{methoddesc}{createInteractionGroup}{prms}
+Creates a group of interactions with specified properties. The type of the interactions is determined by the type of the parameter class \var{prms}. Currently implemented are :
+\begin{itemize}
+\item elastic interactions 
+\item bonded interactions
+\item frictional interactions
+\item velocity weakening friction
+\item gravity
+\item damping 
+\item elastic particle-wall interactions
+\item bonded particle-wall interactions
+\item viscous particle-wall interactions
+\item elastic particle-mesh interactions
+\item bonded particle-mesh interactions
+\end{itemize}
+For details of the parameters, see section \ref{sec::params}.
+\end{methoddesc}
+
+
+%%-----------------------------------
+%% LsmMpi.createExclusion
+%%-----------------------------------
+\begin{methoddesc}{createExclusion}{interactionName1,interactionName2}
+Creates an interaction exclusion. When a pair of particles come into contact, a decision is made as to the types of interactions to which the pair are subjected. An exclusion precludes a pair of particles from being subjected to the interaction \var{interactionName2} if they are already subjected to \var{interactionName1}. This is necessary, for instance, in fracture models, where particles are initially elastically bonded, but after fracture occurs particles are subjected to a frictional type of interaction. In this case an exculsion would need to be created by create{\sf Exclusion(bonded,friction)}, so that particle pairs can not interact frictionally while they are bonded together.
+
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.readGeometry
+%%-----------------------------------
+\begin{methoddesc}{readGeometry}{fileName}
+Initialize the model with the geometry, i.e. particle positions, sizes and connectivity described in the file \var{fileName}. For the format of the geometry file see Appendix \ref{cha:geofileformat}.
+\end{methoddesc}
+
+
+%%-----------------------------------
+%% LsmMpi.readMesh
+%%-----------------------------------
+\begin{methoddesc}{readMesh}{fileName,meshName}
+Read a mesh in Finley format from file \var{fileName} and setup a triangle mesh. The mesh is accessible under the name \var{meshName}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.readMesh2D
+%%-----------------------------------
+\begin{methoddesc}{readMesh2D}{fileName,meshName}
+Read a 2D (line) mesh in Finley format from file \var{fileName} and setup a line mesh. The mesh is accessible under the name \var{meshName}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.createWall
+%%-----------------------------------
+\begin{methoddesc}{createWall}{name,posn,normal}
+Add a wall named \var{name} with the initial position \var{position} and normal vector \var{normal} to the model. In the context of ESyS-Particle a ``Wall'' is a infinite, rigid planar object which interacts with the particles, but in general doesn't move itself in response to the forces resulting from those interactions (see section \ref{sec:walls}). 
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.moveParticleTo
+%%-----------------------------------
+\begin{methoddesc}{moveParticleTo}{id,posn}
+Sets the absolute position of the particle with Id \var{id} to \var{posn}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.moveWall
+%%-----------------------------------
+\begin{methoddesc}{moveWallBy}{wallName,displacement}
+Move one of the walls created by addWall. The name of the wall to be moved is given by \var{wallName} and the displacement by \var{displacement}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.moveSingleMeshNodeBy
+%%-----------------------------------
+\begin{methoddesc}{moveSingleMeshNodeBy}{meshName,nodeId,delta}
+Moves an individual mesh node/vertex.
+\begin{itemize}
+\item \var{meshName}: Name which identifies an existing mesh.
+\item \var{nodeId}: The identifier of the node within this mesh which is to be moved.
+\item \var{delta}: The node is moved by this vector.
+\end{itemize}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.applyForceToWall
+%%-----------------------------------
+\begin{methoddesc}{applyForceToWall}{interactionName,Force}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.createGravity
+%%-----------------------------------
+\begin{methoddesc}{createGravity}{gravityPrms}
+
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setParticleVelocity
+%%-----------------------------------
+\begin{methoddesc}{setParticleVelocity}{id,Velocity}
+Set the velocity of the particle with ID \var{id} to \var{Velocity}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setParticleAngularVelocity
+%%-----------------------------------
+\begin{methoddesc}{setParticleAngularVelocity}{id,AngularVelocity}
+Set the angular velocity of the particle with ID \var{id} to \var{AngularVelocity}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setVelocityOfWall
+%%-----------------------------------
+\begin{methoddesc}{setVelocityOfWall}{name,Velocity}
+Set the velocity of a wall with viscous drag. This does {\bf not} influence the position of the wall, only the viscous drag applied to particles interaction with the wall. Therefore it is meaningless for walls without viscous drag.
+\begin{itemize}
+\item \var{name}
+\item \var{Velocity}
+\end{itemize}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.tagParticleNearestTo
+%%-----------------------------------
+\begin{methoddesc}{tagParticleNearestTo}{tag,mask,Position}
+
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.findClosestParticle
+%%-----------------------------------
+\begin{methoddesc}{findClosestParticle}{pt}
+Returns the Id of the particle closest to a specified point \var{pt}.
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.getParticlePosn
+%%-----------------------------------
+\begin{methoddesc}{getParticlePosn}{id}
+Returns the location of a particle with a specified Id \var{id}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setParticleNonDynamic
+%%-----------------------------------
+\begin{methoddesc}{setParticleNonDynamic}{id}
+Set the particle with ID \var{id} non-dynamic, i.e. the particle still interacts with other particles the usual way but doesn't move in response to forces applied to it. Useful if the particle is moved in order to create a deformation source.
+ 
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.setParticleNonRotational
+%%-----------------------------------
+\begin{methoddesc}{setParticleNonRotational}{id}
+Set the with ID \var{id} non-rotational, i.e. it still participates in rotational (RotFriction, RotBonded) interactions but doesn't rotate in response to applied torque. \note{Only applicable if the particle type is rotational} 
+\end{methoddesc}
+
+
+%%-----------------------------------
+%% LsmMpi.setTimingFileName
+%%-----------------------------------
+\begin{methoddesc}{setTimingFileName}{fileName}
+Method to switch on the saving of timing information and set the filename to \var{fileName}.
+\end{methoddesc}
+
+
+
+%%-----------------------------------
+%% LsmMpi.createCheckPointer
+%%-----------------------------------
+\begin{methoddesc}{createCheckPointer}{prms}
+Causes simulation to periodically save the entire model state to file. The parameters are contained in a CheckPointPrms object \var{prms}. The parameter class is described in section \ref{subsec::checkpointparams}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.addPreTimeStepRunnable
+%%-----------------------------------
+\begin{methoddesc}{addPreTimeStepRunnable}{runnable}
+Adds a Runnable object  (see section \ref{sec::runnable}) to the list of runnables. The Runnable.run method is called before the execution of each time-step. This method can be used to introduce a loading mechanism (apply force to walls, move walls, etc).
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.addPostTimeStepRunnable
+%%-----------------------------------
+\begin{methoddesc}{addPostTimeStepRunnable}{runnable}
+Adds a Runnable object  (see section \ref{sec::runnable}) to the list of runnables. The Runnable.run method is called afterthe execution of each time-step. 
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.createFieldSaver
+%%-----------------------------------
+\begin{methoddesc}{createFieldSaver}{prms}
+Causes specified data to be saved periodically to file. The parameters are contained in the parameter object \var{prms} described in section \ref{subsec::fieldsaverparams}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.visitNodeRefs2d
+%%-----------------------------------
+\begin{methoddesc}{visitNodeRefs2d}{meshName,nodeRefVisitor}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.visitRefStressPairs2d
+%%-----------------------------------
+\begin{methoddesc}{visitRefStressPairs2d}{meshName,refStressVisitor}
+\end{methoddesc}
+
+%%-----------------------------------
+%% LsmMpi.visitParticlesWithId
+%%-----------------------------------
+\begin{methoddesc}{visitParticlesWithId}{idList,particleVisitor}
+\end{methoddesc}
+
+\end{classdesc}
+%% END LsmMpi --------
+
+%% === RUNNABLE ===
+\section{The Runnable Class}
+\label{sec::runnable}
+
+%% === INTERACTION PARAMETERS ===
+\section{Interaction Parameter Classes}
+\label{sec::params}
+
+%%-----------------------------------
+%% NRotElasticPrms
+%%-----------------------------------
+\begin{classdesc}{NRotElasticPrms}{name,k}
+The parameter class for elastic interactions between non-rotational particles.The interaction is purely repulsive elastic if the particles are in contact and no interaction otherwise.
+\begin{itemize}
+\item \var{name} : the name of the created interaction
+\item \var{k} :  the spring constant
+\end{itemize}
+\end{classdesc}
+
+%%-----------------------------------
+%% NRotBondPrms
+%%-----------------------------------
+\begin{classdesc}{NRotBondPrms}{tag,name,k,rbreak}
+The parameter class for bonded interactions between non-rotational particles. The interaction is repulsive elastic if the particles are closer than the equilibrium distance (the sum of the radii) and attractive if the particles are further apart than the equilibrium distance. If the particles are further apart than the breaking distance than the interaction is removed. The absolute breaking distance for each pair of bonded particles is calculated from the relative breaking distance \var{rbreak} and the particle radii$r_i$ and $r_j$ , i.e. $r^{abs}_{break}=r_{break}(r_i+r_j)$.
+\begin{itemize}
+\item \var{tag} : the connection tag in the geometry description for which the interactions are created,
+\item \var{name} : the name of the created interaction ,
+\item \var{k} :  the spring constant,
+\item \var{rbreak} : the relative breaking distance
+\end{itemize}
+
+\end{classdesc}
+
+%%-----------------------------------
+%% NRotFrictionPrms
+%%-----------------------------------
+\begin{classdesc}{NRotFrictionPrms}{name,$k_n$,$\mu$,$k_s$}
+The parameter class for elastic frictional interactions between rotational particles.The interaction is repulsive elastic in normal and frictional in tangential direction. \note{Only applicable if the particle type is rotational} 
+\begin{itemize}
+\item \var{name} : the name of the created interaction
+\item $k_n$ : radial (normal) spring constant,
+\item $\mu$ : friction coefficient,
+\item $k_s$ : tangential (shear) stiffness
+\end{itemize}
+\end{classdesc}
+
+%%-----------------------------------
+%% RotBondPrms
+%%-----------------------------------
+\newcommand{\brkForce}[1]{f^{\rm max}_{#1}}
+\newcommand{\brkTorque}[1]{t^{\rm max}_{#1}}
+\begin{classdesc}{RotBondPrms}{tag, interactionName, $k_r$, $k_s$, $k_t$, $k_b$, $\brkForce{r}$, $\brkForce{s}$, $\brkForce{t}$, $\brkForce{b}$}
+
+The parameter class for bonded interactions between rotational particles including radial, shearing, torsional and bending elasticity. 
+\note{Only applicable if the particle type is rotational} 
+\begin{itemize}
+\item \var{tag} : the connection tag for which the interactions are created,
+\item \var{interationName} : the name of the created interaction,
+\item{$k_r$} : radial (normal) spring constant,
+\item{$k_s$} : shearing (tangent) spring constant,
+\item{$k_t$} : torsional spring constant,
+\item{$k_b$} : bending spring constant,
+\item{$\brkForce{r}$} : maximum normal force for bond breakage,
+\item{$\brkForce{s}$} : maximum shear force for bond breakage,
+\item{$\brkTorque{t}$} : maximum torsion torque for bond breakage,
+\item{$\brkTorque{b}$} : maximum bending torque for bond breakage.
+\end{itemize}
+\end{classdesc}
+
+%%-----------------------------------
+%% RotFrictionPrms
+%%-----------------------------------
+\begin{classdesc}{RotFrictionPrms}{name, kn, mu, ks}
+\end{classdesc}
+
+%%-----------------------------------
+%% VWFrictionPrms
+%%-----------------------------------
+\begin{classdesc}{VWFrictionPrms}{name, normalK, staticMu, shearK,alpha}
+The parameter class for velocity weakening friction between non-rotation particles. The velocity depnedent coefficient of friction is calculated as $\mu=\mu_0/(1+2\alpha v_s)$ where $\mu_0$ is the static coefficient of friction as given by \var{shearK} and $v_s$ is the realtive slip (tangential) velocity between the particles.
+\begin{itemize}
+\item \var{name} (string) :  Name assigned to this group of interactions.
+\item \var{normalK} (float) : spring constant used when calculating linear elastic normal force.
+\item \var{staticMu} (float) : friction coefficient at zero relative velocity
+\item \var{shearK} (float) : spring constant used when calculating linear elastic shear force.
+\item \var{alpha} (float) : coefficient for the amount of weakening - see equation above.
+\end{itemize}
+ 
+
+\end{classdesc}
+
+%%-----------------------------------
+%% GravityPrms
+%%-----------------------------------
+\begin{classdesc}{GravityPrms}{name,accel}
+The parameter class for gravity. The gravitational acceleration \var{accel} is not restricted to the $-z$-direction but can be arbitrary. 
+\begin{itemize}
+\item \var{name} : the name of the created interaction,
+\item \var{accel} : the gravitational acceleration
+\end{itemize}
+\end{classdesc}
+
+%%-----------------------------------
+%% DampingPrms
+%%-----------------------------------
+\begin{classdesc}{DampingPrms}{type, name, visc, nmax}
+The parameter class for particle damping. The parameter \var{type} determines what type of damping is applied. If \var{type}=''Damping'', linear damping is applied, i.e. the particle velocity is damped. If \var{type}=''RotDamping'', the angular velocity of the particle is damped. \note{If, in case of rotational particles, both linear and angular velocity need to be damped, two instances of damping are necessary, one with ``Damping'' and ``RotDamping'' type. }
+\begin{itemize}
+\item \var{type} : the type of the damping, ''Damping'' or ''RotDamping'',
+\item \var{name} : the name of the created interaction,
+\item \var{visc} : the damping coefficient,
+\item \var{nmax} : the maximum iteration count
+\end{itemize}
+\end{classdesc}
+
+%%-----------------------------------
+%% NRotElasticWallPrms
+%%-----------------------------------
+\begin{classdesc}{NRotElasticWallPrms}{interactionName,wallName,k}
+\end{classdesc}
+
+
+%%-----------------------------------
+%% NRotBondedWallPrms
+%%-----------------------------------
+\begin{classdesc}{NRotBondedWallPrms}{interactionName,wallName,k,particleTag}
+\end{classdesc}
+
+%% ===== SAVER PARAMETERS =============
+\section{Saver Parameter Classes}
+\subsection{Checkpointing Parameters}
+\label{subsec::checkpointparams}
+
+\begin{classdesc}{CheckPointPrms}{fileNamePrefix,beginTimeStep,endTimeStep,timeStepIncr}
+Parameters for specifying check-pointing intervals.
+\begin{itemize}
+\item \var{fileNamePrefix} (string) : prefix of files where checkpoint data is saved.
+\item \var{beginTimeStep} (int) : time step when checkpoint saving begins.
+\item \var{endTimeStep} (int) : time step when checkpoint saving stops.
+\item \var{timeStepIncr} (int) : a checkpoint is made every \var{timeStepIncr} time-steps.
+\end{itemize}
+At each checkpoint a N+1 files are saved where N is the number of worker processes, one ``master'' file containing the meta-data and one ``data'' file for each worker process. The file names of the checkpoints are determined from the given prefix \var{fileNamePrefix}, the current time step and the id (MPI-rank) of the process that has saved this snapshot. The filenames generated are PREFIX_t=T_M.txt where PREFIX is the file name prefix \var{fileNamePrefix}, T the current time step and M is 0 for the ``master'' file and 1...N for the ``data'' files. For example, if the prefix is ``cpt'' and the simulation is run using 4 worker processes, a checkpoint after 1000 timesteps would result in the files cpt_t=1000_0.txt, cpt_t=1000_1.txt, cpt_t=1000_2.txt, cpt_t=1000_3.txt and  cpt_t=1000_4.txt. For the details of the data format of the checkpoints, see Appendix \ref{app::dump}
+\end{classdesc}
+
+%% === FIELD SAVER PARAMETERS ===
+\subsection{Field Saver Parameters}
+\label{subsec::fieldsaverparams}
+
+%%------------------------------------
+%% ParticleScalarFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{ParticleScalarFieldSaverPrms}{fieldName,fileName,fileFormat,beginTimeStep,endTimeStep,timeStepIncr}
+Parameters for saving scalar particle-data to file.
+\begin{itemize}
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\end{itemize}
+\end{classdesc}
+
+%%------------------------------------
+%% ParticleVectorFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{ParticleVectorFieldSaverPrms}{fieldName,fileName,fileFormat,beginTimeStep,endTimeStep,timeStepIncr}
+Parameters for saving vector particle-data to file.
+\begin{itemize}
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\end{itemize}
+\end{classdesc}
+
+%%------------------------------------
+%% InteractionScalarFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{InteractionScalarFieldSaverPrms}{interactionName, fieldName,fileName, fileFormat, beginTimeStep, endTimeStep, timeStepIncr}
+Parameters for saving scalar interaction-data to file.
+\begin{itemize}
+\item \var{interactionName} (string) :  Name of the interaction group for which data is saved.
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\end{itemize}
+\end{classdesc}
+
+%%------------------------------------
+%% InteractionCheckedScalarFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{CheckedInteractionScalarFieldSaverPrms}{interactionName, fieldName,fileName, fileFormat, beginTimeStep, endTimeStep, timeStepIncr}
+Parameters for saving scalar interaction-data from checked fields to file.
+\begin{itemize}
+\item \var{interactionName} (string) :  Name of the interaction group for which data is saved.
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\end{itemize}
+\end{classdesc}
+
+%%------------------------------------
+%% TaggedInteractionScalarFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{TaggedInteractionScalarFieldSaverPrms}{interactionName, fieldName,fileName, fileFormat, beginTimeStep, endTimeStep, timeStepIncr}
+Parameters for saving scalar data from tagged interactions to file.
+\begin{itemize}
+\item \var{interactionName} (string) :  Name of the interaction group for which data is saved.
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\item \var{tag} (int) :  the particle tag.
+\item \var{mask} (int) : The mask used in the tag comparison, i.e. the field is saved for particles for which the following is true: $(particle->getTag() | Mask ) == (Tag | Mask)$, i.e. the mask is used to determine which bits in the tag are compared.
+\end{itemize}
+\end{classdesc}
+
+%%------------------------------------
+%% InteractionVectorFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{InteractionVectorFieldSaverPrms}{interactionName, fieldName,fileName, fileFormat, beginTimeStep, endTimeStep, timeStepIncr}
+Parameters for saving vector interaction-data to file.
+\begin{itemize}
+\item \var{interactionName} (string) :  Name of the interaction group for which data is saved.
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\end{itemize}
+\end{classdesc}
+
+%%------------------------------------
+%% TaggedParticleScalarFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{TaggedParticleScalarFieldSaverPrms}{fieldName, fileName, fileFormat, beginTimeStep, endTimeStep, timeStepIncr, tag, mask}
+Parameters for saving scalar particle-data to file. The field is only saved for particles with a tag fulfilling the given criteria.
+\begin{itemize}
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\item \var{tag} (int) :  the particle tag.
+\item \var{mask} (int) : The mask used in the tag comparison, i.e. the field is saved for particles for which the following is true: $(particle->getTag() | Mask ) == (Tag | Mask)$, i.e. the mask is used to determine which bits in the tag are compared. For example if Tag=5 (binary 101) and Mask=4 (binary 100), particles with a tag in which bit 3 is 1 would be used, i.e. 5 (101) or 6 (110), but not 8 (1000). A Mask of -1 (binary all 1) will lead to an exact comparison of the tags.
+\end{itemize}
+\end{classdesc}
+
+%%------------------------------------
+%% TaggedParticleVectorFieldSaverPrms
+%%------------------------------------
+\begin{classdesc}{TaggedParticleVectorFieldSaverPrms}{fieldName, fileName, fileFormat, beginTimeStep, endTimeStep, timeStepIncr, tag, mask}
+Parameters for saving vector particle-data to file.  The field is only saved for particles with a tag fulfilling the given criteria.
+\begin{itemize}
+\item \var{fieldName} (string) : Name of the data field, eg 'e_kin'.
+\item \var{fileName} (string) : Name of the file where data is saved.
+\item \var{fileFormat} (string) : Format in which the data is saved - for example, 'SUM' or 'DX'.
+\item \var{beginTimeStep} (int) : start saving data at this time step
+\item \var{endTimeStep} (int) : finish saving data at this time step
+\item \var{timeStepIncr} (int) : save data every \var{timeStepIncr} time steps
+\item \var{tag} (int) :  the particle tag.
+\item \var{mask} (int) : The mask used in the tag comparison. See above.
+\end{itemize}
+\end{classdesc}
+
+
+%% ===== EXAMPLES =========
+\chapter{Examples}
+\section{A Simple Example}
+
+The section describes a simple, near minimal, ESyS-Particle script for the simulation of the uniaxial compression of a 3D block of solid material. 
+
+\verbatiminput{../../Python/esys/lsm/examples/simple/compress3d.py} 
+
+
+\section{A complicated Example}
+Shanes wave propagation script goes here.
+
+%%-------------------------------------------
+%% APPENDICES
+%%-------------------------------------------
+
+\appendix
+
+%%-------------------------------------------
+%% APPENDIX A : BENCHMARKS
+%%-------------------------------------------
+\chapter{Benchmarks}
+
+A set of benchmarks is supplied with the ESyS-Particle package, with each benchmark testing particular aspects of the code. All benchmarks are derived from application cases. The benchmarks scripts can be found in the esys.lsm.benchmarks directory of the ESyS-Particle package.
+
+%%-------------------------------------------
+%% Uniaxial compression benchmark
+%%-------------------------------------------
+\section{Benchmark 1: 3D Uniaxial Compression}
+
+This is a simple benchmark testing the execution speed of rotational bonded and frictional interactions and the rebuilding of the dynamic interaction list after breaking of bonded interactions. Due to the relatively small deformation the rebuilding of the neighbor table is infrequent and therefore has no major influence on the total runtime. The benchmark is executed mainly on a single CPU (i.e. 1 worker process) and thus does not test communication performance.
+ 
+\begin{tabular}[h]{|l|l|l|l|l|l||l|}
+\hline
+Date & ESyS-Particle Version & System & CPU & Compiler & Options & Time (min)\\
+\hline
+\hline
+12.08.2005 & 1.0 Beta1 & SGI Altix 3700 & Itanium 2 1.3Ghz & Intel CC 8.0.058 & -O3 & 53:33 \\  
+\hline
+14.08.2005 & 1.0 Beta1 & Dell D600 & Pentium M 1.6Ghz & GCC 3.2.3 & -O2 & 65:56 \\
+ \hline
+26.10.2005 & 1.0Beta1 & Dell Precision 380 & Pentium4-650 3.4Ghz & gcc 3.4.3 & -O2 & 32:51 \\
+\hline
+\end{tabular}
+
+\section{Benchmark 2 : 2D Gouge Shear}
+
+This benchmark simulates the constant velocity / constant normal stress shear of a fault containing a fault gouge consisting of single particles. Because the benchmark employs circular boundary conditions it requires at least 2 worker processes. Due to the large deformation relatively frequent updates of the neighbor table and transfers of particles between nodes are performed. The benchmark is scalable to an arbitrary number of CPUs by geometrically scaling the size of the model. A shell script {\sf gengouge.sh} for the generation of the model geometry is provided.  The benchmark script and the geometry generation script take the number of CPUs as command line parameters, i.e. {\sf gouge2dbench N M} where N is the number of CPUs in x-direction (therefore N needs to be at least 2) and M in y-direction. The total number of CPUs is M*N. The performance is given in Particles*timesteps/second. 
+
+\begin{tabular}[h]{|l|l|l|l|l|l||l|l|}
+\hline
+Date & ESyS-Particle Version & $N_{cpu}$ & MxN & Compiler & Options & Time  & Performance \\
+\hline
+\hline
+\multicolumn{2}{|l}{System: } & \multicolumn{6}{l|}{SGI Altix 3700, Itanium 2 1.3Ghz } \\
+\hline
+23.08.05 & 1.0 Beta1 & 2 & 2x1 & Intel CC 8.0.058 & -O3 & 176s & 182314 \\
+\hline
+23.08.05 & 1.0 Beta1 & 4 & 2x2  & Intel CC 8.0.058 & -O3 & 267s & 238430 \\
+\hline
+24.08.05 & 1.0 Beta1 & 8 & 4x2  & Intel CC 8.0.058 & -O3 & 311s & 414394 \\
+\hline
+24.08.05 & 1.0 Beta1 & 16 & 4x4  & Intel CC 8.0.058 & -O3 & 461s & 540357 \\
+\hline
+24.08.05 & 1.0 Beta1 & 16 & 8x2  & Intel CC 8.0.058 & -O3 & 381s & 688580 \\
+\hline
+\end{tabular}  
+
+\section{Benchmark 3 : 3D Planar Fault Slip}
+
+\section{Benchmark 4 : }
+
+\section{Benchmark 5 : }
+%%-------------------------------------------
+%% APPENDIX B : TOOLS
+%%-------------------------------------------
+\chapter{Tools included in the Distribution}
+
+\section{The Geometry Generator - ``gengeo''}
+\label{sec:gengeo}
+
+List of command line options:
+
+\begin{itemize}
+
+\item {\bf -o} {\it FILENAME} The name of the output file.
+\item {\bf -r} {\it RAD} The minimal particle radius in a random packing.
+\item {\bf -x} {\it XMAX}, {\bf -y} {\it YMAX}, {\bf -z} {\it ZMAX} : The dimensions of a rectangular or hexahedral geometry to be created. If a z-dimension is given, a 3D geometry is created, otherwise the geometry is 2D. The ``lower'' corner is always (0,0) in 2D or (0,0,0) in 3D and the ``upper'' corner is located at (XMAX,YMAX) or (XMAX,YMAX,ZMAX) respectively.
+\end{itemize}
+
+\subsection{Examples}
+
+\subsubsection{A single-particle gouge between elastic blocks in 2D} 
+
+\section{Converting Snapshots to Visualisation Files - ``dump2vtk'' and ``dump2pos''}
+
+%%-------------------------------------------
+%% APPENDIX C : GEOMETRY FILE FORMAT
+%%-------------------------------------------
+\include{geo-file}
+
+%%-------------------------------------------
+%% APPENDIX D : GEOMETRY FILE FORMAT
+%%-------------------------------------------
+\include{dump-file}
+
+%% index
+\input{userman.ind}
+
+%% =================================================
+%%   bibliography
+%% =================================================
+\begin{thebibliography}{1}
+
+\bibitem{lsm-parallel1}
+        {\normalsize \textrm{S. Abe, D. Place and P. Mora, 2004, } \textit{A Parallel Implementation of the Lattice Solid Model for the Simulation of Rock Mechanics and Earthquake Dynamics, } \textrm{Pure Appl. Geophys., {\bf 161,}}}
+
+\bibitem{cundall-dem}
+  {\normalsize \textrm{P. A. Cundall and O. D. A. Strack, 1979, } \textit{A Discrete Numerical Model for Granular Assemblies, }\textrm{Ge\'otechnique, {\bf 29,} 47-65}}
+
+\bibitem{stick-slip}
+  {\textrm {P. Mora and D. Place, 1994, }\textit{Simulation of the Stick-Slip Instability, }\textrm{Pure Appl. Geophys., {\bf 143,} 61-87}}
+
+\bibitem{geocomplex}
+  {\normalsize \textrm{P. Mora, D. Place, S. Abe and S. Jaum\'e, 2000 } \textit{Lattice solid simulations of the physics of fault zones and earthquakes: the model, results and directions }\textrm{ Geocomplexity and the Physics of Earthquakes, AGU, Washington}}
+
+\bibitem{lsm-packing}
+        {\normalsize \textrm {D. Place and P. Mora, 2001, } \textit{A Random Lattice Solid Model for Simulation of Fault Zone Dynamics and Fracture Processes, } \textrm{In:} \textit{Bifurcation and Localisation Theory for Soils and Rocks'99 }\textrm{(Eds. H. B. M\"uhlhaus, A. Dyskin and E Pasternak)(AA Balkema, Rotterdam/Brookfield 2001)}}    
+
+\end{thebibliography}
+
+\end{document}

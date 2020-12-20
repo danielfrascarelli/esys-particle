@@ -1,0 +1,126 @@
+\section{Interaction Groups}\label{table:interaction_groups}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|} \cline{2-4}
+  \multicolumn{1}{c|}{} & 
+  \multicolumn{1}{p{40 mm}|}{
+    \centering{\link{\textbf{NRotSphere}}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotSphere-class.html}}
+  } & 
+  \multicolumn{1}{p{40 mm}|}{
+    \centering{\link{\textbf{RotSphere}}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotSphere-class.html}}
+  } & 
+  \multicolumn{1}{p{40 mm}|}{
+    \centering{\link{\textbf{RotThermalSphere}}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotThermalSphere-class.html}}
+  } 
+  \\\hline
+  % Start Body Forces
+  & 
+  \multicolumn{3}{c|}{
+    \link{Gravity}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.GravityPrms-class.html}
+  }
+  \\\cline{2-4}
+  & 
+  \multicolumn{3}{c|}{
+    \link{Damping}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.DampingPrms-class.html}
+  } 
+  \\\cline{2-4}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Body Forces}} & 
+  \multicolumn{3}{c|}{
+    \link{LinDamping}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.LinDampingPrms-class.html}
+  } 
+  \\\cline{2-4}
+  & 
+  & 
+  \link{RotDamping}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotDampingPrms-class.html}
+  &
+  \\\hline\hline
+  % End Body Forces
+  % Start Unbonded Particle-Particle Interactions
+  \textbf{Unbonded} &  &  &  \\
+  \textbf{Particle-Particle} & 
+  \raisebox{2 ex}[0 pt]{\link{NRotElastic}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotElasticPrms-class.html}} & 
+  \raisebox{2 ex}[0 pt]{\link{RotElastic}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotElasticPrms-class.html}} &
+  \raisebox{2 ex}[0 pt]{\link{RotThermalElastic}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotThermalElasticPrms-class.html}}
+  \\[-1.35 ex] \cline{2-4} \\[-1.35 ex]
+  \textbf{Interactions} & 
+  \raisebox{0.5 ex}[0 pt]{\link{NRotFriction}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotFrictionPrms-class.html}} & 
+  \raisebox{0.5 ex}[0 pt]{\link{RotFriction}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotFrictionPrms-class.html}} &
+  \raisebox{0.5 ex}[0 pt]{\link{RotThermalFriction}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotThermalFrictionPrms-class.html}}
+  \\\hline\cline{1-4}
+  % End Unbonded Particle-Particle Interactions
+  % Start Bonded Particle-Particle Interactions
+  \textbf{Bonded} &  &  & 
+  \\
+  \textbf{Particle-Particle} &
+  \link{NRotBond}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotBondPrms-class.html} & 
+  \link{RotBond}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotBondPrms-class.html} &
+  \link{RotThermalBond}
+    {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.RotThermalBondPrms-class.html}
+  \\
+  \textbf{Interactions} &  &  &
+  \\\hline\hline
+  % End Bonded Particle-Particle Interactions
+  % Start UnBonded Wall-Particle Interactions
+  \textbf{Unbonded} & 
+  \multicolumn{3}{c|}{
+    \link{NRotElasticWall}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotElasticWallPrms-class.html}
+  } 
+  \\\cline{2-4}
+  \textbf{Wall-Particle} & 
+  \multicolumn{3}{c|}{
+    \link{NRotElasticLinMesh}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotElasticLinMeshPrms-class.html}
+  } 
+  \\\cline{2-4}
+  \textbf{Interactions} & 
+  \multicolumn{3}{c|}{
+    \link{NRotElasticTriMesh}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotElasticTriMeshPrms-class.html}
+  } 
+  \\\hline\cline{1-4}
+  % End UnBonded Wall-Particle Interactions
+  % Start Bonded Wall-Particle Interactions
+  & 
+  \multicolumn{3}{c|}{
+    \link{NRotBondedWall}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotBondedWallPrms-class.html}
+  } 
+  \\\cline{2-4}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Bonded}} & 
+  \multicolumn{3}{c|}{
+    \link{NRotBondedLinMesh}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotBondedLinMeshPrms-class.html}
+  } 
+  \\\cline{2-4}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Wall-Particle}} & 
+  \multicolumn{3}{c|}{
+    \link{NRotBondedTriMesh}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotBondedTriMeshPrms-class.html}
+  } 
+  \\\cline{2-4}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Interactions}} & 
+  \multicolumn{3}{c|}{
+    \link{NRotSoftBondedWall}
+      {http://esys.geocomp.uq.edu.au/esys-particle_python_doc/current/pythonapi/html/esys.lsm.LsmPy.NRotSoftBondedWallPrms-class.html}
+  } 
+  \\\hline
+  % End Bonded Wall-Particle Interactions
+\end{tabular}
+\end{center}
+\end{table}

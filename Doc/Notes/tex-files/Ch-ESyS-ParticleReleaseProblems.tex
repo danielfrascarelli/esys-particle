@@ -1,0 +1,178 @@
+%!TEX root = ../ESyS-ParticleNotes.tex
+
+\chapter{Problems found during build} % (fold)
+\label{cha:problems_found_during_build}
+
+\section{Problems with Python} % (fold)
+\label{sec:problems_with_python}
+
+\subsection{Not installing pip} % (fold)
+\label{sub:not_installing_pip}
+
+During installation of Python 3.4, sometimes it comes up with a warning where PIP is not installed.
+
+\lstinline{Ignoring ensurepip failure: pip 1.5.4 requires SSL/TLS}
+
+This can be fixed by installing the SSL library:
+
+\lstinline{sudo apt-get install libssl-dev openssl}
+
+\section{Problems with Boost} % (fold)
+\label{sec:problems_with_boost}
+
+\subsection{Syntax error on bootstrap}
+
+For Python 3.1 and above, there is a syntax error that comes when running \lstinline{bootstrap.sh}. This is caused by an older version of Python's print function. Details on the patch can be found here: \url{https://svn.boost.org/trac/boost/ticket/5677}.
+
+\subsection{Can't find pyconfig.h on b2} % (fold)
+
+During the \lstinline{./b2} command, if pyconfig.h can't be found. This is caused by Python's naming convention for the include directory from 3.2 and above. To fix it, insure that it is in the path. i.e:
+\begin{lstlisting}[style=inlineBash]
+$ export CPLUS_INCLUDE_PATH="CPLUS_INCLUDE_PATH:$HOME/BUILD/include/python3.xm/"
+\end{lstlisting}
+
+\section{Problems with Povray} % (fold)
+\label{sec:problems_with_povray}
+
+Povray 3.7.0 can only be built with Boost 1.53 or higher, undefined references are found when using Boost 1.52. These undefined references are found in the boost threading library.
+
+\subsection{Missing Makefile.in} % (fold)
+\label{sub:missing_makefile_in}
+
+If there is a problem from a missing Makefile.in, follow these instructions to install Povray-3.7. The problem here is caused by how different versions of automake respond to files in sub-directories.
+
+\begin{lstlisting}[style=inlineBash]
+$ cd povray-3.7-stable/unix
+$ sed 's/automake --w/automake --add-missing --w/g' -i prebuild.sh
+$ sed 's/dist-bzip2/dist-bzip2 subdir-objects/g' -i configure.ac
+$ ./prebuild.sh
+$ cd ..
+$ ./bootstrap
+$ ./configure COMPILED_BY="your name <email@address>" --prefix=$HOME/BUILD
+$ make
+$ make install
+\end{lstlisting}
+
+\subsection{Missing thread library} % (fold)
+\label{sub:missing_thread_library}
+
+Installation of Povray 3.7 can't be done because of this error:
+\begin{lstlisting}[style=inlineBash]
+checking for boostlib >= 1.37... yes
+checking whether the Boost::Thread library is available... yes
+checking whether the boost thread library is usable... no
+configure: error: in `/home/jrahardjo/BUILD/povray-3.7-stable':
+configure: error: cannot link with the boost thread library
+\end{lstlisting}
+
+This is found during the configure process, this problem is because of it not being able to find the correct Boost::Thread library. So, firstly insure you have installed the threading library, if not, during bootstrapping of boost, insure that it is included (\lstinline{--with-libraries=.....,thread}).
+
+If the same error persists after installing the boost\_threading library, add the libraries manually to the configuration line of Povray (\lstinline{LIBS="-lboost_system -lboost_thread"}).
+
+\section{Problems with ESyS-Particle} % (fold)
+\label{sec:problems_with_esys_particle}
+
+\subsection{Warnings on Subdirectories} % (fold)
+
+** This problem has been solved in rev.1139. **
+
+During \lstinline{./autogen.sh}, a warning with regards to subdirectories is there.
+
+\begin{lstlisting}[style=inlineBash]
+Model/Makefile.am:26: warning: source file '$(top_srcdir)/Fields/FieldMaster.cpp' is in a subdirectory,
+Model/Makefile.am:26: but option 'subdir-objects' is disabled
+automake: warning: possible forward-incompatibility.
+automake: At least a source file is in a subdirectory, but the 'subdir-objects'
+automake: automake option hasn't been enabled.  For now, the corresponding output
+automake: object file(s) will be placed in the top-level directory.  However,
+automake: this behaviour will change in future Automake versions: they will
+automake: unconditionally cause object files to be placed in the same subdirectory
+automake: of the corresponding sources.
+automake: You are advised to start using 'subdir-objects' option throughout your
+automake: project, to avoid future incompatibilities.
+\end{lstlisting}
+
+This is not a problem atm, but might be worth looking into eventually.
+
+\subsection{Python library not found or Permission Errors??} % (fold)
+
+During \lstinline{make install}, there was a problem where Python was not able to find the \lstinline{libpython2.6.so.1.0} object file.
+
+This problem seems to be caused by some permission errors. As the install folders seem to be under root instead of the current user. Using \lstinline{chown -R}, on the install folder, seems to have solved the problem. This was caused by the original command \lstinline{sudo make install}. Use \lstinline{make install} instead.
+
+\subsection{Python 3.x Naming conventions} % (fold)
+\label{subsec:python3_naming_conventions}
+
+** This problem has been solved in rev.1146. **
+
+There is a problem with Python 3.2 and above where the naming convention has changed from \lstinline{pythonx.x} to \lstinline{pythonx.xm}. And as such, there are problems found in the configure file as well as during make. A fix for the configuration process has been placed and it lets the user go through the config with no problems. But this problem arises again during the build process and as such, a soft-link from \lstinline{libpython3.x.so} to \lstinline{libpython3.xm.so} needs to be created to solve this problem temporarily.
+
+\begin{lstlisting}[style=inlineBash]
+$ ln -sf $HOME/BUILD/lib/libpython3.xm.so $HOME/BUILD/lib/libpython3.x.so
+\end{lstlisting}
+
+\subsection{Cannot find boost/python.hpp} % (fold)
+
+Another error comes up as:
+\begin{lstlisting}[style=inlineBash]
+checking for boost/python.hpp... no
+configure: error: cannot find boost/python.hpp
+\end{lstlisting}
+
+Despite the message, when looking through the \lstinline{config.log}, it was found that it actually found the correct file, but then found undefined references in the file itself. This is caused by a similar naming convention problem as mentioned in the previous section. This is solved by including the required path to the correct include folder.
+\begin{lstlisting}[style=inlineBash]
+$ export CPLUS_INCLUDE_PATH="CPLUS_INCLUDE_PATH:$HOME/BUILD/include/python3.xm/"
+\end{lstlisting}
+
+\subsection{Cannot find the flags to link with Boost Python} % (fold)
+
+** This problem has been solved in rev.1146. **
+
+Another error appears where it is unable to link with Boost Python library.
+\begin{lstlisting}[style=inlineBash]
+checking for Boost python library... no
+configure: error: cannot find the flags to link with Boost python
+\end{lstlisting}
+After looking through the config.log, this problem was caused by an incompatibility of Unicode between UCS4 and UCS2 of the python version. To solve this problem, specifically add the version of Python when configuring boost.
+
+This problem was caused by similar reasons to \ref{subsec:python3_naming_conventions}.
+\begin{lstlisting}[style=inlineBash]
+$ ./bootstrap.sh --prefix=$HOME/BUILD --with-python=$HOME/BUILD/bin/python3.xm --with-libraries=filesystem,python,regex,system
+$ ./b2 include="$HOME/BUILD/include/python3.xm"
+$ ./b2 install
+\end{lstlisting}
+
+\subsection{*.Plo files not found} % (fold)
+\label{sub:_plo_files_not_found}
+
+During make, sometimes it comes up with an error where it is unable to find .Plo files. The solution to this is to add \lstinline{--disable-dependecy-tracking} option to the \lstinline{./configure} command
+
+\subsection{Error on running script} % (fold)
+\label{sub:error_on_running_script}
+
+When running the script using \lstinline{mpirun}, there has been an error with \lstinline{_sysconfigdata_m} missing from python.
+
+\begin{lstlisting}[style=inlineBash]
+Traceback (most recent call last):
+  File "/usr/lib/python3.3/site.py", line 629, in <module>
+    main()
+  File "/usr/lib/python3.3/site.py", line 614, in main
+    known_paths = addusersitepackages(known_paths)
+  File "/usr/lib/python3.3/site.py", line 284, in addusersitepackages
+    user_site = getusersitepackages()
+  File "/usr/lib/python3.3/site.py", line 260, in getusersitepackages
+    user_base = getuserbase() # this will also set USER_BASE
+  File "/usr/lib/python3.3/site.py", line 250, in getuserbase
+    USER_BASE = get_config_var('userbase')
+  File "/usr/lib/python3.3/sysconfig.py", line 610, in get_config_var
+    return get_config_vars().get(name)
+  File "/usr/lib/python3.3/sysconfig.py", line 560, in get_config_vars
+    _init_posix(_CONFIG_VARS)
+  File "/usr/lib/python3.3/sysconfig.py", line 432, in _init_posix
+    from _sysconfigdata import build_time_vars
+  File "/usr/lib/python3.3/_sysconfigdata.py", line 6, in <module>
+    from _sysconfigdata_m import *
+ImportError: No module named '_sysconfigdata_m'
+\end{lstlisting}
+
+This is caused because of multiple python installations and the system not being able to find the correct one. Fix the python installation to fix this problem. Another solution is to make sure that the environment variables are pointing to the correct directories (check \lstinline{~/.bashrc}).

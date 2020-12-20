@@ -1,0 +1,135 @@
+\documentclass[a4paper,12pt,openright,twoside]{book} %FOR PRINTING
+% \documentclass[a4paper,12pt,openany,oneside]{book} %FOR ONLINE
+
+\usepackage{ReportStyle}
+\usepackage[toc]{appendix}
+
+\usepackage[pass, includeheadfoot, top = 0.5cm, bottom = 1cm]{geometry} % To centre the title page
+\usepackage{graphics} % if you want encapsulated PS figures.
+\usepackage{url}
+
+\usepackage{listings}
+\usepackage{color, colortbl}
+
+\usepackage{enumitem}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\definecolor{light-gray}{gray}{0.95}
+
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\ttfamily\footnotesize,% the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=Python,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2                        % sets default tabsize to 2 spaces
+  % title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\lstdefinestyle{text}{
+  numbers=none
+  % breaklines = false
+}
+
+\lstdefinestyle{inlineBash}{
+  numbers=none,
+  % breaklines = false,
+  frame=none,
+  language = bash,
+  backgroundcolor=\color{light-gray}
+}
+
+% \usepackage[sorting=none,backend=bibtex]{biblatex}
+% \bibliography{DominantColourClassifier}
+
+% Number subsections but not subsubsections:
+\setcounter{secnumdepth}{2}
+% Show subsections but not subsubsections in table of contents:
+\setcounter{tocdepth}{2}
+
+\pagestyle{headings}		% Chapter on left page, Section on right.
+\raggedbottom
+
+\setlength{\topmargin}		{-5mm}  %  25-5 = 20mm
+\setlength{\oddsidemargin}	{10mm}  % rhs page inner margin = 25+10mm
+\setlength{\evensidemargin}	{0mm}   % lhs page outer margin = 25mm
+\setlength{\textwidth}		{150mm} % 35 + 150 + 25 = 210mm
+\setlength{\textheight}		{240mm} % 
+
+\renewcommand{\baselinestretch}{1.2}	% Looks like 1.5 spacing.
+
+% Stop figure/tables smaller than 3/4 page from appearing alone on a page:
+\renewcommand{\textfraction}{0.25}
+\renewcommand{\topfraction}{0.75}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\floatpagefraction}{0.75}
+
+\newcommand{\titleinfo}{ESyS-Particle Build and Installation Notes} 
+\newcommand{\authorinfo}{Justin Rahardjo, Dr. Vince Boros}
+
+\title{\titleinfo}
+\author{\authorinfo}
+\date{\monthname~\the\year}
+
+\begin{document}
+\frontmatter
+\maketitle
+
+% \chapter{Acknowledgement}
+	
+% \chapter{Abstract}
+
+\tableofcontents
+
+% \listoffigures
+
+% \listoftables
+
+\mainmatter
+\input{./tex-files/Ch-ESyS-ParticleReleaseBuild.tex}
+\input{./tex-files/Ch-ESyS-ParticleReleaseTesting.tex}
+\input{./tex-files/Ch-ESyS-ParticleReleaseProblems.tex}
+\input{./tex-files/Ch-ESyS-ParticleReleaseSteps.tex}
+\input{./tex-files/Ch-ESyS-ParticleDefinitions.tex}
+
+
+\appendix
+
+\chapter{Test Script}
+\label{app:test_script}
+
+\section{Main bash script}
+\lstinputlisting[language=bash]{source-files/run_esysparticle_test.sh}
+
+\clearpage
+\section{Move output files to folders}
+\lstinputlisting[language=bash]{source-files/move_output_files.sh}
+
+\clearpage
+\section{Output test result to file}
+\lstinputlisting[language=python]{source-files/out2file.py}
+
+% \printbibliography
+
+
+\end{document}

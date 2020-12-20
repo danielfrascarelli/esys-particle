@@ -1,0 +1,58 @@
+#############################################################
+##                                                         ##
+## Copyright (c) 2003-2017 by The University of Queensland ##
+## Centre for Geoscience Computing                         ##
+## http://earth.uq.edu.au/centre-geoscience-computing      ##
+##                                                         ##
+## Primary Business: Brisbane, Queensland, Australia       ##
+## Licensed under the Open Software License version 3.0    ##
+## http://www.apache.org/licenses/LICENSE-2.0              ##
+##                                                         ##
+#############################################################
+
+##
+#
+# Begin $(top_srcdir)/Config/rules.am
+#
+
+if TAU_PROFILING
+  include $(TAU_MAKEFILE)
+  AM_MAKEFLAGS = -r CC="$(TAU_CC)" CXX="$(TAU_CXX)" CPPFLAGS="$(TAU_DEFS) $(TAU_INCLUDE) $(TAU_MPI_INCLUDE)"
+
+  PDTPARSE = $(PDTDIR)/$(CONFIG_ARCH)/bin/cxxparse
+  TAUINSTR = $(TAU_PREFIX_INSTALL_DIR)/$(CONFIG_ARCH)/bin/tau_instrumentor
+
+  EXTRA_LD_LIBS = $(TAU_LDFLAGS) $(TAU_MPI_LIBS) $(TAU_LIBS) -lpfm
+
+#
+# Prevent intermediate instrumented files from automatically
+# being deleted.
+#
+.SECONDARY: .inst_cpp .pdb
+
+#
+# Cancel implicit rules
+#
+%.o: %.cpp
+
+%.o:%.inst_cpp
+	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+
+%.inst_cpp: %.pdb
+	$(TAUINSTR) $*.pdb $*.cpp -o $@
+
+%.pdb: %.cpp
+	$(PDTPARSE) $< -I. $(CPPFLAGS) $(AM_CPPFLAGS)
+
+else
+  AM_MAKEFLAGS =
+  EXTRA_LD_LIBS = 
+endif
+
+CLEANFILES = *.inst_cpp *.pdb
+
+#
+# End $(top_srcdir)/Config/rules.am
+#
+##

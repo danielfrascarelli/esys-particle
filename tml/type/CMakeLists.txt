@@ -1,0 +1,6 @@
+FILE(GLOB MODEL_SRC_LIB "*.cpp")
+#===========================================================
+
+ADD_LIBRARY(TmlType SHARED ${MODEL_SRC_LIB})
+TARGET_LINK_LIBRARIES(TmlType ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+INSTALL(TARGETS TmlType DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

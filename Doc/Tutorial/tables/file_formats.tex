@@ -1,0 +1,63 @@
+\section{Descriptions and Output File Formats for Field Saver Field~Names}\label{table:file_formats}
+\begin{table}[h]
+\begin{center}
+\vspace{-2 mm}
+\begin{tabular}{|c|c|c|c|} \cline{2-4} 
+  \multicolumn{1}{c|}{} & \textbf{Field Name} & \textbf{Description} & \textbf{Output Format}\\
+  \hline
+  % Start Particle Scalar Field Savers
+  & id & Unique identifier for a particle & \\\cline{2-3}
+  & tag & Identifier to group subsets of particles & \\\cline{2-3}
+  & radius & Sphere radius & \\\cline{2-3}
+  & v\_abs & Norm of velocity & \footnotesize{SILO}\\\cline{2-3}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Particle}} & sigma\_xx\_2d & XX component of stress tensor & \footnotesize{SUM}\\\cline{2-3}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Scalar}} & sigma\_xy\_2d & XY component of stress tensor & \footnotesize{MAX}\\\cline{2-3}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Field}} & sigma\_yy\_2d & YY component of stress tensor & \footnotesize{RAW\_SERIES}\\\cline{2-3}
+  \raisebox{1.25 ex}[0 pt]{\textbf{Savers}} & sigma\_d & Norm of deviatoric stress tensor & \footnotesize{RAW\_WITH\_POS\_ID}\\\cline{2-3}
+  & e\_kin & Total kinetic energy & \\\cline{2-3}
+  & e\_kin\_linear & Linear kinetic energy & \\\cline{2-3}
+  & e\_kin\_rot & Rotational kinetic energy & \\\cline{2-3}
+  \hline 
+  % End Particle Scalar Field Savers
+  % Start Particle Vector Field Savers
+  & \raisebox{-0.5 ex}[0 pt]{displacement} & \raisebox{-0.5 ex}[0 pt]{Displacement from initial position} & \footnotesize{SILO} \\[0.75 ex]\cline{2-3}\\[-3.5 ex]
+  \textbf{Particle} & \raisebox{-1.25 ex}[0 pt]{position} & \raisebox{-1.25 ex}[0 pt]{Position of particle} & \footnotesize{SUM} \\[1.5 ex]\cline{2-3}\\[-4.25 ex]
+  \textbf{Vector} & \raisebox{-2 ex}[0 pt]{force} & \raisebox{-2 ex}[0 pt]{Force acting on particle} & \footnotesize{MAX} \\[2.25 ex]\cline{2-3}\\[-5 ex]
+  \textbf{Field} & \raisebox{-2.75 ex}[0 pt]{velocity} & \raisebox{-2.75 ex}[0 pt]{Linear velocity} & \footnotesize{RAW2} \\[3 ex]\cline{2-3}\\[-5.75 ex]
+  \textbf{Savers} & \raisebox{-3.5 ex}[0 pt]{ang\_velocity} & \raisebox{-3.5 ex}[0 pt]{Angular velocity} & \footnotesize{RAW\_SERIES} \\[-3 ex]
+  &  &  & \footnotesize{RAW\_WITH\_ID} \\[0.5 ex]
+  \hline\hline 
+  % End Particle Vector Field Savers
+  % Start Wall Vector Field Savers
+  \textbf{Wall} &  &  & \\
+  \textbf{Vector} & \raisebox{1.25 ex}[0 pt]{Position} & \raisebox{1.25 ex}[0 pt]{Position of wall} & \footnotesize{SILO}\\[-0.25 ex] \cline{2-3}\\[-2.6 ex]
+  \textbf{Field} &  &  & \footnotesize{RAW\_SERIES}\\[-0.5 ex]
+  \textbf{Savers} & \raisebox{1 ex}[0 pt]{Force} & \raisebox{1 ex}[0 pt]{Force acting on wall} & \\
+  \hline\hline 
+  % End Wall Vector Field Savers
+  % Start Interaction Scalar Field Savers
+  & count & Number of interactions between particles & \\\cline{2-3}
+  & sticking & Number of static friction interactions & \\\cline{2-3}
+  & slipping & Number of dynamic friction interactions & \\\cline{2-3}
+  & strain & Nonrotational bond strain & \footnotesize{SUM}\\\cline{2-3}
+  \textbf{Interaction} & breaking\_criterion & Value needed to break a bond & \footnotesize{MAX}\\\cline{2-3}
+  \textbf{Scalar} & force\_deficit & Additional force needed for slipping & \footnotesize{RAW}\\\cline{2-3}
+  \textbf{Field} & dissipated\_energy & Energy dissipated from slipping & \footnotesize{RAW2}\\\cline{2-3}
+  \textbf{Savers} & potential\_energy & Total potential energy & \footnotesize{RAW\_WITH\_ID}\\\cline{2-3}
+  & e\_pot\_normal & Normal potential energy & \footnotesize{RAW\_WITH\_POS\_ID}\\\cline{2-3}
+  & e\_pot\_shear & Shear potential energy & \\\cline{2-3}
+  & e\_pot\_twist & Tortional potential energy & \\\cline{2-3}
+  & e\_pot\_bend & Bending potential energy & \\\cline{2-3}
+  \hline
+  % End Interaction Scalar Field Savers
+  % Start Interaction Vector Field Savers
+  \textbf{Interaction} &  &  & \footnotesize{SUM}\\
+  \textbf{Vector} & \raisebox{1 ex}[0 pt]{force} & \raisebox{1 ex}[0 pt]{Force acting between particles} & \footnotesize{RAW2}\\[-0 ex] \cline{2-3}\\[-2.6 ex]
+  \textbf{Field} &  &  & \footnotesize{RAW\_WITH\_ID}\\
+  \textbf{Savers} & \raisebox{1.5 ex}[0 pt]{normal\_force} & \raisebox{1.5 ex}[0 pt]{Normal component of force} & \footnotesize{RAW\_WITH\_POS\_ID}\\
+  \hline
+  % End Interaction Vector Field Savers
+\end{tabular}
+\end{center}
+\end{table}
+

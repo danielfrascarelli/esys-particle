@@ -1,0 +1,40 @@
+#############################################################
+##                                                         ##
+## Copyright (c) 2003-2017 by The University of Queensland ##
+## Centre for Geoscience Computing                         ##
+## http://earth.uq.edu.au/centre-geoscience-computing      ##
+##                                                         ##
+## Primary Business: Brisbane, Queensland, Australia       ##
+## Licensed under the Open Software License version 3.0    ##
+## http://www.apache.org/licenses/LICENSE-2.0              ##
+##                                                         ##
+#############################################################
+
+ESyS-Particle: HPC Discrete Element Modelling Software 
+https://launchpad.net/esys-particle/
+
+OVERVIEW
+ESyS-Particle is a software package for particle-based numerical modelling. The software implements the Discrete Element Method (DEM), a widely used technique for modelling processes involving large deformations, granular flow and/or fragmentation. ESyS-Particle is designed for execution on parallel supercomputers, clusters or multi-core PCs running a Linux-based OS. The C++ simulation engine implements spatial domain decomposition via the Message Passing Interface (MPI). A Python wrapper API provides flexibility in the design of numerical models, specification of modelling parameters and contact logic, and analysis of simulation data. ESyS-Particle has been utilised to simulate earthquake nucleation, comminution in shear cells, silo flow, rock fragmentation, and fault gouge evolution, to name but a few applications.
+
+FEATURES
+   * MPI parallel simulation engine
+   * Python API for simulation setup and execution
+   * scriptable setup of model geometry
+   * non-rotational and rotational spherical particles
+   * triangular meshes for specifying boundary conditions and walls
+   * scriptable visualisation of particle assemblies utilising POVray and VTK
+   * a variety of particle-particle and particle-wall interaction laws
+         * linear elastic repulsion between unbonded contacting particles
+         * linear elastic bonds between bonded particle-pairs
+         * both non-rotational and rotational frictional interactions between unbonded particles
+         * rotational bonds implementing torsion and bending stiffnesses in addition to normal and shear stiffnesses
+         * heat transfer via conduction between contacting particles
+
+DEVELOPMENT HISTORY
+ESyS-Particle has been developed in-house within the Centre for Geoscience Computing at the University of Queensland, Brisbane, Australia since 1994. The software was originally called the Lattice Solid Model and later LSMEarth before the Australian Computational Earth Systems Simulator (ACcESS) Major National Research Facility commenced funding software development in 2002. From 2002-2007, ACcESS MNRF funding resulted in rapid development of ESyS-Particle into commercial-grade DEM software, released freely under the Open Software License v3.0 (http://www.apache.org/licenses/LICENSE-2.0). ESyS-Particle software development continues to be funded under the Australian Government AuScope National Collaborative Infrastructure Strategy. One of the key developers, Steffen Abe, is now based at RWTH Aachen, Germany and continues to actively contribute towards ESyS-Particle development.
+
+CONTRIBUTORS
+See the AUTHORS file for a list of contributors to ESyS-Particle.
+
+GET INVOLVED
+The ESyS-Particle software development team is always willing to welcome new developers interested in contributing to the code-base. If you would like to contribute, please contact Dion Weatherley (d.weatherley@uq.edu.au).

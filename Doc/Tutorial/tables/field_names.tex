@@ -1,0 +1,62 @@
+\section{Field Saver Field Names for Common Particle Types and Interaction Groups}\label{table:field_names}
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|} \cline{3-4} 
+  \multicolumn{2}{c|}{} & \textbf{Scalar Field Name} & \textbf{Vector Field Name}\\
+  \hline
+  % Start Particle Types
+  &  & id & \\
+  &  & tag & \\
+  &  & radius & \\
+  &  & v\_abs & \raisebox{1.25 ex}[0 pt]{displacement}\\
+  & \raisebox{1.25 ex}[0 pt]{NRotSphere} & sigma\_xx\_2d & \raisebox{1.25 ex}[0 pt]{position}\\
+  \textbf{Particles} & \raisebox{1.25 ex}[0 pt]{RotSphere} & sigma\_xy\_2d & \raisebox{1.25 ex}[0 pt]{force}\\
+  &  & sigma\_yy\_2d & \raisebox{1.25 ex}[0 pt]{velocity}\\
+  &  & sigma\_d & \\
+  &  & e\_kin & \\
+  \cline{2-4}
+  &  & e\_kin\_linear & \\
+  & \raisebox{1.25 ex}[0 pt]{RotSphere} & e\_kin\_rot & \raisebox{1.25 ex}[0 pt]{ang\_velocity}\\
+  \hline\hline 
+  % End Particle Types
+  % Start Wall Types
+  &  &  & Position\\
+  \raisebox{1.25 ex}[0 pt]{\textbf{Walls}} & \raisebox{1.25 ex}[0 pt]{NRotElasticWall} &  & Force\\
+  \hline\hline 
+  % End Wall Types
+  % Start Interaction Types
+  & Damping &  & \\
+  & RotDamping & \raisebox{1.25 ex}[0 pt]{dissipated\_energy} & \raisebox{1.25 ex}[0 pt]{force}\\
+  \cline{2-4}
+  & NRotElastic &  & \\
+  & RotElastic & \raisebox{1.25 ex}[0 pt]{count} & force\\
+  & RotThermalElastic & \raisebox{1.25 ex}[0 pt]{potential\_energy} & \\
+  \cline{2-4}
+  &  & count & \\
+  &  & sticking & \\
+  & \raisebox{1.25 ex}[0 pt]{NRotFriction} & slipping & force\\
+  & \raisebox{1.25 ex}[0 pt]{RotFriction} & force\_deficit & normal\_force\\
+  \textbf{Interactions} & \raisebox{1.25 ex}[0 pt]{RotThermalFriction} & dissipated\_energy & \\
+  &  & potential\_energy & \\
+  \cline{2-4}
+  &  &  & frictional\_force\\
+  & \raisebox{1.25 ex}[0 pt]{RotFriction} &  & tangential\_force\\
+  \cline{2-4}
+  & NRotBond & strain & \\
+  \cline{2-4}
+  & NRotBond & count & \\
+  & RotBond & breaking\_criterion & force\\
+  & RotThermalBond & potential\_energy & \\
+  \cline{2-4}
+  &  & e\_pot\_normal & \\
+  & RotBond & e\_pot\_shear & \\
+  & RotThermalBond & e\_pot\_twist & \\
+  &  & e\_pot\_bend & \\
+  \cline{2-4}
+  &  &  & normal\_force\\
+  & \raisebox{1.25 ex}[0 pt]{RotBond} &  & tangential\_force\\
+  \hline
+\end{tabular}
+\end{center}
+\end{table}
+
