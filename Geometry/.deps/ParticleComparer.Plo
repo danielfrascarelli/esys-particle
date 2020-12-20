@@ -1,0 +1,8 @@
+ParticleComparer.lo: ParticleComparer.cpp /usr/include/stdc-predef.h \
+ ../Geometry/ParticleComparer.h ../Geometry/ParticleComparer.hpp
+
+/usr/include/stdc-predef.h:
+
+../Geometry/ParticleComparer.h:
+
+../Geometry/ParticleComparer.hpp:

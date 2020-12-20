@@ -1,0 +1,14 @@
+#!/bin/sh
+echo "WARNING:" 
+echo "=======" 
+echo
+echo "The use of 'mpipython' to execute ESyS-Particle simulations" 
+echo "is deprecated as of ESyS-Particle v2.2."
+echo
+echo "Instead, use a commandline similar to:"
+echo "mpirun -np 3 esysparticle myscript.py"
+echo
+echo "Now executing: \"esysparticle $*\"..."
+echo
+
+esysparticle $*

@@ -1,1 +1,1 @@
-static int s_bzr_revision=1215;
+static int s_bzr_revision=1218;
