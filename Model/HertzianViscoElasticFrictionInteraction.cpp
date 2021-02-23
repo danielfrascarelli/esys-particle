@@ -463,7 +463,7 @@ double CHertzianViscoElasticFrictionInteraction::getDissipatedEnergy() const
 */
 Vec3 CHertzianViscoElasticFrictionInteraction::getForce() const
 {
-  const Vec3 f=m_is_touching ? m_Ffric-m_normal_force : Vec3(0.0,0.0,0.0);
+  const Vec3 f=m_is_touching ? m_normal_force-m_Ffric : Vec3(0.0,0.0,0.0);
   return f; 
 }
 
