@@ -55,7 +55,7 @@ void CHertzianElasticInteraction::calcForces()
     dist=sqrt(dist);
     m_dn=eq_dist-dist;
     Vec3 dir=D.unit();
-    m_force=dir*(m_E*sqrt(R_ij))/(2.0*(1.0-m_nu*m_nu))*pow(m_dn,1.5);
+    m_force=dir*m_E*sqrt(R_ij)*2/(3.0*(1.0-m_nu*m_nu))*pow(m_dn,1.5);
     //std::cerr << "HF: " <<  dir << " " << R_ij << " " << m_dn << " " << m_force << std::endl; 
     Vec3 pos=m_p2->getPos()+(m_p2->getRad()/eq_dist)*D;
     m_p1->applyForce(m_force,pos);
