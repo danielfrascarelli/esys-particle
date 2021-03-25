@@ -163,7 +163,7 @@ void CRotElasticInteraction::saveRestartData(std::ostream &oStream)
   oStream << m_init  << " ";
   oStream << m_kr << " ";
   oStream << m_scaling << " ";
-  oStream << m_D;
+  oStream << m_D << std::endl;
 }
 
 /*!

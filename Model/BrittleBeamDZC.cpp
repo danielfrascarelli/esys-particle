@@ -298,7 +298,7 @@ void BrittleBeamDZCInteraction::saveRestartData(std::ostream &oStream)
     oStream << m_cohesion << " ";
     oStream << m_tanAngle << " ";
     oStream << m_beta1 << " ";
-    oStream << m_beta2;
+    oStream << m_beta2 << std::endl;
 }
 
 /*!

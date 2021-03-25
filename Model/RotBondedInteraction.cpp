@@ -395,7 +395,7 @@ void CRotBondedInteraction::saveRestartData(std::ostream &oStream)
   oStream << m_max_tMoment << " ";
   oStream << m_max_bMoment << " ";
   oStream << m_D << " ";
-  oStream << getTag() ;
+  oStream << getTag() << std::endl;
 }
 
 /*!

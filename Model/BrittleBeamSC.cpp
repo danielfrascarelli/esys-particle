@@ -298,7 +298,7 @@ void BrittleBeamSCInteraction::saveRestartData(std::ostream &oStream)
     oStream << getTag() << " ";
     oStream << m_sigma3 << " ";
     oStream << m_cohesion << " ";
-    oStream << m_tanAngle;
+    oStream << m_tanAngle << std::endl;
 }
 
 /*!

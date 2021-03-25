@@ -507,7 +507,7 @@ void CRotThermFrictionInteraction::saveRestartData(std::ostream &oStream)
   oStream << m_diffusivity << " ";
   oStream << m_ds.X() << " ";
   oStream << m_ds.Y() << " ";
-  oStream << m_ds.Z();
+  oStream << m_ds.Z() << std::endl;
 }
 
 
