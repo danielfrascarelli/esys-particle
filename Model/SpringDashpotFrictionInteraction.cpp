@@ -232,7 +232,7 @@ pair<bool,double> CSpringDashpotFrictionInteraction::getAbsFrictionalStress() co
   if(dist<(eq_dist*eq_dist))
   {
           res.first=true;
-          double Ac=eq_dist*eq_dist*0.7854; // contact area
+          double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
           res.second=m_Ffric.norm()/Ac;
   }
   else
@@ -287,7 +287,7 @@ pair<bool,double> CSpringDashpotFrictionInteraction::getMaxFricStress() const
     dist=sqrt(dist);
     Vec3 force=D*(m_k*(dist-eq_dist)/dist);
     res.first=true;
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=force.norm()/Ac;
   }
   else
@@ -316,7 +316,7 @@ pair<bool,double> CSpringDashpotFrictionInteraction::getNormalStress() const
   if(m_is_touching){
     res.first=true;
     double eq_dist=m_p1->getRad()+m_p2->getRad();
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=m_normal_force.norm()/Ac;
   } else {
     res.first=false;

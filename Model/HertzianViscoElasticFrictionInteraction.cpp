@@ -256,7 +256,7 @@ CHertzianViscoElasticFrictionInteraction::getAbsFrictionalStress() const
   if(dist<(eq_dist*eq_dist))
   {
     res.first=true;
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=m_Ffric.norm()/Ac;
   }
   else
@@ -351,7 +351,7 @@ CHertzianViscoElasticFrictionInteraction::getMaxFricStress() const
       (pow(dn,1.5)+m_A*sqrt(dn)*m_dn_dot);
     Vec3 force = norm_force < 0 ? Vec3(0.0,0.0,0.0) : dir*norm_force;
     res.first=true;
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=force.norm()/Ac;
   }
   else
@@ -381,7 +381,7 @@ CHertzianViscoElasticFrictionInteraction::getNormalStress() const
   if(m_is_touching){
     res.first=true;
     double eq_dist=m_p1->getRad()+m_p2->getRad();
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=m_normal_force.norm()/Ac;
   } else {
     res.first=false;

@@ -256,7 +256,7 @@ CHertzMindlinViscoInteraction::getAbsFrictionalStress() const
   if(dist<(eq_dist*eq_dist))
   {
     res.first=true;
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=m_Ffric.norm()/Ac;
   }
   else
@@ -341,7 +341,7 @@ CHertzMindlinViscoInteraction::getMaxFricStress() const
     force -= normal_damping;
 
     res.first=true;
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=force.norm()/Ac;
   }
   else
@@ -371,7 +371,7 @@ CHertzMindlinViscoInteraction::getNormalStress() const
   if(m_is_touching){
     res.first=true;
     double eq_dist=m_p1->getRad()+m_p2->getRad();
-    double Ac=eq_dist*eq_dist*0.7854; // contact area
+    double Ac=eq_dist*eq_dist*M_PI/4.0; // contact area
     res.second=m_normal_force.norm()/Ac;
   } else {
     res.first=false;
