@@ -201,18 +201,14 @@ void ParallelInteractionStorage_ED<P,InteractionType>::calcHeatTrans()
 template<typename P,typename InteractionType>
 void ParallelInteractionStorage_ED<P,InteractionType>::saveCheckPointData(std::ostream &oStream)
 {
-  const std::string delim = "\n";
-
   typename ParallelInteractionStorage_E<P,InteractionType>::InteractionIterator it =
     this->getInnerInteractionIterator();
-  oStream << InteractionType::getType() << delim;
+  oStream << InteractionType::getType() << std::endl;
   oStream << it.getNumRemaining();
   if (it.hasNext()) {
-    oStream << delim;
     it.next().saveRestartData(oStream);
     while (it.hasNext())
     {
-      oStream << delim;
       it.next().saveRestartData(oStream);
     }
   }

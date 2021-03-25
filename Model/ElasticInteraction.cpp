@@ -190,7 +190,7 @@ void CElasticInteraction::saveRestartData(std::ostream &oStream)
   oStream << m_id[1] << " ";
   oStream << m_init  << " ";
   oStream << m_k << " ";
-  oStream << m_scaling;
+  oStream << m_scaling << std::endl;
 }
 
 /*!

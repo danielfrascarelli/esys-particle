@@ -610,7 +610,7 @@ void CRotFrictionInteraction::saveRestartData(std::ostream &oStream)
   oStream << m_is_touching << " ";
   oStream << m_Ffric.X() << " ";
   oStream << m_Ffric.Y() << " ";
-  oStream << m_Ffric.Z();
+  oStream << m_Ffric.Z() << std::endl;
 }
 
 
