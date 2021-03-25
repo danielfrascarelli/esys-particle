@@ -94,6 +94,8 @@ void CHertzianViscoElasticInteraction::calcForces()
     Vec3 pos=m_p2->getPos()+(m_p2->getRad()/eq_dist)*D;
     m_p1->applyForce(m_force,pos);
     m_p2->applyForce(-1.0*m_force,pos); 
+
+    m_cpos=pos;
   } else {
     m_force=Vec3(0.0,0.0,0.0);
     m_dn=0.0;
